@@ -14,4 +14,4 @@ import { TracksPageComponent } from '@features/tracks/pages/tracks-page/tracks-p
     </footer>
   `,
 })
-export class App {}
+export class AppComponent {}
