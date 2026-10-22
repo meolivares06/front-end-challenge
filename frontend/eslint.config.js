@@ -44,6 +44,7 @@ const boundary = (files, ...patterns) => ({
 const feature = (layer) => `src/app/features/*/${layer}/**/*.ts`;
 
 module.exports = defineConfig([
+  { ignores: ['**/node_modules/**', '**/dist/**', '**/.angular/**', '**/coverage/**'] },
   {
     files: ['**/*.ts'],
     extends: [
