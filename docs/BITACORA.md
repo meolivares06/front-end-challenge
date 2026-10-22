@@ -5,21 +5,21 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | # | Sessão | Commits |
 |---|---|---|
 | 1 | [Leitura do desafio e impedimentos](#1-leitura-do-desafio-e-impedimentos) | — |
-| 2 | [Configuração inicial](#2-configuração-inicial) | `99fd442` `dd0ea93` |
-| 3 | [API intermediária (BFF)](#3-api-intermediária-bff) | `9eb8a06` `3eca6ad` |
-| 4 | [Feature de faixas e interface](#4-feature-de-faixas-e-interface) | `4a880af` `327e3e8` `4111dee` `e69121e` |
-| 5 | [Aliases de import](#5-aliases-de-import) | `ed974ef` |
-| 6 | [Store: separação de responsabilidades](#6-store-separação-de-responsabilidades) | `ce573de` |
-| 7 | [TypeScript estrito](#7-typescript-estrito) | `b444ce3` |
-| 8 | [Imutabilidade e regra de negócio pura](#8-imutabilidade-e-regra-de-negócio-pura) | `0d9f0dd` |
-| 9 | [Proteção contra violações de arquitetura](#9-proteção-contra-violações-de-arquitetura) | `7e16657` |
+| 2 | [Configuração inicial](#2-configuração-inicial) | `bb9b0f6` `ffb634a` |
+| 3 | [API intermediária (BFF)](#3-api-intermediária-bff) | `8366c77` `c9f24a9` |
+| 4 | [Feature de faixas e interface](#4-feature-de-faixas-e-interface) | `a403e32` `2cd0a35` `b41019d` `77018d2` |
+| 5 | [Aliases de import](#5-aliases-de-import) | `70d1ac9` |
+| 6 | [Store: separação de responsabilidades](#6-store-separação-de-responsabilidades) | `3f5e98d` |
+| 7 | [TypeScript estrito](#7-typescript-estrito) | `fb6e53f` |
+| 8 | [Imutabilidade e regra de negócio pura](#8-imutabilidade-e-regra-de-negócio-pura) | `3db1e54` |
+| 9 | [Proteção contra violações de arquitetura](#9-proteção-contra-violações-de-arquitetura) | `02ac741` |
 | 10 | [Decisão: ESLint agora, Sheriff depois](#10-decisão-eslint-agora-sheriff-depois) | — |
-| 11 | [Política de cobertura](#11-política-de-cobertura) | `e4f0ca7` `996414c` |
-| 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `e9db712` |
-| 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `e9d43fd` |
-| 14 | [Governança de IA](#14-governança-de-ia) | `a5365e3` `ea3c902` `0ede5fd` |
-| 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | `2bb31b4` `d93bde5` |
-| 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `dd4ea24` `8800c54` `d9e4ce6` |
+| 11 | [Política de cobertura](#11-política-de-cobertura) | `1b2914e` `aa5d971` |
+| 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `adbf19f` |
+| 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `dcbecf3` |
+| 14 | [Governança de IA](#14-governança-de-ia) | `a8b3b53` `b57a108` `9cc2218` |
+| 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | `ea2540e` `9d5a95b` |
+| 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `338516b` `3ef5b09` `678fc3c` |
 | 17 | [Testes E2E](#17-testes-e2e) | ver abaixo |
 
 ---
@@ -382,7 +382,7 @@ cd frontend && npm ci && npm run lint:boundaries && npm run lint && npm run test
 - SSR: os dados vêm do BFF a cada carga, e não há conteúdo estático que valha prerenderizar.
 - CSS no lugar de SCSS: é preferência do autor, não melhoria.
 
-**Correções que vieram da conferência com as regras oficiais** (`e9d43fd`)
+**Correções que vieram da conferência com as regras oficiais** (`dcbecf3`)
 
 - `NgOptimizedImage` nas capas, mais `preconnect` para `i.scdn.co`.
 - O AXE encontrou `label-content-name-mismatch` (WCAG 2.5.3): o `aria-label` do botão de ordenação não continha o texto visível. Agora o botão usa o próprio texto + `aria-pressed`. Resultado: 0 violações AXE (WCAG 2.0/2.1 A e AA) em desktop e mobile, nos estados de sucesso e de erro.
