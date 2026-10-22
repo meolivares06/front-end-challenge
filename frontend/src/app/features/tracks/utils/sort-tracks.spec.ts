@@ -1,4 +1,4 @@
-import { Track } from '../models/track.model';
+import type { Track } from '../models/track.model';
 import { sortTracksByTitle } from './sort-tracks';
 
 const track = (title: string) => ({ title, isrc: title }) as Track;
@@ -16,7 +16,7 @@ describe('sortTracksByTitle', () => {
   });
 
   it('inverte a ordem em desc e não altera o array original', () => {
-    expect(sortTracksByTitle(tracks, 'desc')[0].title).toBe('zebra');
-    expect(tracks[0].title).toBe('zebra');
+    expect(sortTracksByTitle(tracks, 'desc')[0]?.title).toBe('zebra');
+    expect(tracks[0]?.title).toBe('zebra');
   });
 });

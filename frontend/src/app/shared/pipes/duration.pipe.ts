@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, type PipeTransform } from '@angular/core';
 
 /** Converte milissegundos em mm:ss (ex.: 215000 → "03:35"). */
 export function formatDuration(ms: number): string {

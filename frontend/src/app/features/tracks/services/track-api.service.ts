@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, Observable, of, throwError } from 'rxjs';
-import { Track, TracksResult } from '../models/track.model';
+import type { Track, TracksResult } from '../models/track.model';
 
 /** Erro lançado quando o fornecedor de dados (Spotify, via API) não está disponível. */
 export class IntegrationUnavailableError extends Error {

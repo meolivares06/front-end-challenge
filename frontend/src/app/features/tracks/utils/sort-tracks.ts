@@ -1,4 +1,4 @@
-import { SortDirection, Track } from '../models/track.model';
+import type { SortDirection, Track } from '../models/track.model';
 
 const collator = new Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true });
 

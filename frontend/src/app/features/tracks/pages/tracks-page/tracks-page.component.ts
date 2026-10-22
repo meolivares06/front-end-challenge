@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
 import { AlertComponent } from '@shared/components/alert/alert.component';
 import { IconComponent } from '@shared/icons/icon.component';
 import { withViewTransition } from '@shared/utils/view-transition';

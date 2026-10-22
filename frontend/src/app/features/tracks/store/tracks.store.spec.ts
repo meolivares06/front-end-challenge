@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { buildTrack } from '@testing/track.fixture';
 import { Observable, of, Subject, throwError } from 'rxjs';
-import { TracksResult } from '../models/track.model';
+import type { TracksResult } from '../models/track.model';
 import { IntegrationUnavailableError, TrackApiService } from '../services/track-api.service';
 import { TracksStore } from './tracks.store';
 
@@ -69,6 +69,6 @@ describe('TracksStore', () => {
     store.toggleDirection();
 
     expect(store.direction()).toBe('desc');
-    expect(store.tracks()[0].title).toBe('Zebra');
+    expect(store.tracks()[0]?.title).toBe('Zebra');
   });
 });

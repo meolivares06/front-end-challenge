@@ -35,7 +35,7 @@ describe('TracksPageComponent (integração)', () => {
     respondAll((isrc, i) => {
       const req = http.expectOne(`/api/tracks/${isrc}`);
       if (i < titles.length)
-        req.flush(buildTrack({ isrc, title: titles[i], availableInBrazil: i !== 0 }));
+        req.flush(buildTrack({ isrc, title: titles[i] ?? '', availableInBrazil: i !== 0 }));
       else req.flush({}, { status: 404, statusText: 'Not Found' });
     });
     await fixture.whenStable();

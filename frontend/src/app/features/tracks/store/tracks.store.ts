@@ -1,7 +1,7 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { SortDirection, Track } from '../models/track.model';
+import type { SortDirection, Track } from '../models/track.model';
 import { TrackApiService } from '../services/track-api.service';
 import { CONTRACT_ISRCS } from '../utils/contract-isrcs';
 import { sortTracksByTitle } from '../utils/sort-tracks';

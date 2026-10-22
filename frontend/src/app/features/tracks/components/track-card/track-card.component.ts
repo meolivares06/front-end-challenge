@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { IconComponent } from '@shared/icons/icon.component';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
-import { Track } from '../../models/track.model';
+import type { Track } from '../../models/track.model';
 import { formatReleaseDate } from '../../utils/format-release-date';
 import { AudioPreviewComponent } from '../audio-preview/audio-preview.component';
 
