@@ -1,7 +1,7 @@
 import { SpotifyUnavailableError } from './spotify-error.js';
 
 /** Cliente fino da Web API: só a busca por ISRC que o desafio precisa. */
-export function createSpotifyClient({ apiUrl }, tokenService, fetchFn = fetch) {
+export function createSpotifyClient({ apiUrl, timeoutMs = 5000 }, tokenService, fetchFn = fetch) {
   return {
     /**
      * Busca uma faixa pelo ISRC. Com `market`, o Spotify devolve `is_playable`
@@ -16,6 +16,7 @@ export function createSpotifyClient({ apiUrl }, tokenService, fetchFn = fetch) {
       try {
         response = await fetchFn(`${apiUrl}/search?${params}`, {
           headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.timeout(timeoutMs),
         });
       } catch (error) {
         throw new SpotifyUnavailableError('Não foi possível conectar ao Spotify', error);

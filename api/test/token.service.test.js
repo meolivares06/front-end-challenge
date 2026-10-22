@@ -27,3 +27,34 @@ describe('TokenService', () => {
     await expect(service.getToken()).rejects.toBeInstanceOf(SpotifyUnavailableError);
   });
 });
+
+describe('TokenService — concorrência e timeout', () => {
+  it('pedidos simultâneos compartilham uma única requisição de token', async () => {
+    const fetchFn = vi.fn().mockResolvedValue(jsonResponse({ access_token: 'tok', expires_in: 3600 }));
+    const service = createTokenService(options, fetchFn);
+
+    const tokens = await Promise.all(Array.from({ length: 10 }, () => service.getToken()));
+
+    expect(tokens).toEqual(Array(10).fill('tok'));
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it('após uma falha, o próximo pedido tenta de novo', async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({}, 500))
+      .mockResolvedValueOnce(jsonResponse({ access_token: 'tok', expires_in: 3600 }));
+    const service = createTokenService(options, fetchFn);
+
+    await expect(service.getToken()).rejects.toBeInstanceOf(SpotifyUnavailableError);
+    expect(await service.getToken()).toBe('tok');
+  });
+
+  it('desiste quando o Spotify não responde dentro do prazo', async () => {
+    const hang = (_url, { signal }) =>
+      new Promise((_resolve, reject) => signal.addEventListener('abort', () => reject(signal.reason)));
+    const service = createTokenService({ ...options, timeoutMs: 20 }, hang);
+
+    await expect(service.getToken()).rejects.toBeInstanceOf(SpotifyUnavailableError);
+  });
+});
