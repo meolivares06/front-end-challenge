@@ -16,6 +16,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 10 | [Decisão: ESLint agora, Sheriff depois](#10-decisão-eslint-agora-sheriff-depois) | — |
 | 11 | [Política de cobertura](#11-política-de-cobertura) | `e4f0ca7` `996414c` |
 | 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `e9db712` |
+| 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `e9d43fd` |
+| 14 | [Governança de IA](#14-governança-de-ia) | ver abaixo |
 
 ---
 
@@ -357,3 +359,43 @@ cd frontend && npm ci && npm run lint:boundaries && npm run lint && npm run test
 ```
 
 **Para ativar no GitHub.** Basta o arquivo estar no repositório: no fork, a aba **Actions** passa a mostrar o workflow `ci` em cada PR. Opcionalmente, em *Settings → Branches*, marcar os jobs `Frontend (Angular)` e `API (BFF)` como **checks obrigatórios** para o merge.
+
+---
+
+## 13. Parte 3 do artigo e conferência com a doc do Angular
+
+**Referência.** [Parte 3](https://medium.com/@ortegavan/como-eu-configuro-um-projeto-greenfield-em-angular-parte-3-74b1e26c6f35): cria a aplicação real, liga o Sheriff a ela e adiciona um `AGENTS.md`.
+
+**O que já fazíamos igual (validação):** standalone, `OnPush`, zoneless e signals no lugar de `BehaviorSubject`. Também corrigimos as violações de `verbatimModuleSyntax` do código gerado com `import type`, em vez de desligar a opção, exatamente como o autor fez, e já usávamos as regras de acessibilidade de templates.
+
+**Adotado**
+
+- `AGENTS.md`, mas só depois de conferir a doc oficial do Angular, o que mudou o plano (seção 14).
+- Ignores globais no ESLint (`node_modules`, `dist`, `.angular`, `coverage`).
+
+**Descartado**
+
+- Workspace pnpm com `apps/`: temos uma app só.
+- SSR: os dados vêm do BFF a cada carga, e não há conteúdo estático que valha prerenderizar.
+- CSS no lugar de SCSS: é preferência do autor, não melhoria.
+
+**Correções que vieram da conferência com as regras oficiais** (`e9d43fd`)
+
+- `NgOptimizedImage` nas capas, mais `preconnect` para `i.scdn.co`.
+- O AXE encontrou `label-content-name-mismatch` (WCAG 2.5.3): o `aria-label` do botão de ordenação não continha o texto visível. Agora o botão usa o próprio texto + `aria-pressed`. Resultado: 0 violações AXE (WCAG 2.0/2.1 A e AA) em desktop e mobile, nos estados de sucesso e de erro.
+
+---
+
+## 14. Governança de IA
+
+Documento completo: **[docs/GOVERNANCA-IA.md](GOVERNANCA-IA.md)**.
+
+**Resumo da decisão**
+
+- Duas fontes de contexto, cada uma com um dono: `frontend/AGENTS.md` **gerado pelo Angular CLI 21** (boas práticas oficiais, sem edição) e `AGENTS.md` na raiz, **escrito à mão**, só com o que é específico do projeto (53 linhas).
+- `CLAUDE.md` com `@AGENTS.md` e `@frontend/AGENTS.md`, porque o Claude Code lê `CLAUDE.md`.
+- Servidor MCP do Angular CLI em `.mcp.json`, **somente leitura** e com a versão fixada em 21. Verificado: encontra o workspace.
+- As regras críticas não dependem do texto: são garantidas por lint, TypeScript estrito, cobertura, AXE e CI.
+
+**Por que gerar em vez de copiar.** O angular.dev já documenta a v22 (onde `OnPush` é padrão e não deve ser declarado), enquanto o projeto é v21. O arquivo gerado pelo CLI do projeto acompanha a versão instalada.
+
