@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TracksPageComponent } from './features/tracks/pages/tracks-page/tracks-page.component';
+import { TracksPageComponent } from '@features/tracks/pages/tracks-page/tracks-page.component';
 
 @Component({
   selector: 'app-root',

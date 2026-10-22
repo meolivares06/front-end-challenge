@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { IconComponent } from '../../../../shared/icons/icon.component';
+import { IconComponent } from '@shared/icons/icon.component';
 import { AudioPreviewService } from '../../services/audio-preview.service';
 
 @Component({

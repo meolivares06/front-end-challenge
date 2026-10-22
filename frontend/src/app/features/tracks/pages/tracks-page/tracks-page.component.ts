@@ -8,9 +8,9 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AlertComponent } from '../../../../shared/components/alert/alert.component';
-import { IconComponent } from '../../../../shared/icons/icon.component';
-import { withViewTransition } from '../../../../shared/utils/view-transition';
+import { AlertComponent } from '@shared/components/alert/alert.component';
+import { IconComponent } from '@shared/icons/icon.component';
+import { withViewTransition } from '@shared/utils/view-transition';
 import { TrackCardComponent } from '../../components/track-card/track-card.component';
 import { TrackSkeletonComponent } from '../../components/track-skeleton/track-skeleton.component';
 import { SortDirection, Track } from '../../models/track.model';

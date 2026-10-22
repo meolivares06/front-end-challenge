@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { IconComponent } from '../../icons/icon.component';
+import { IconComponent } from '@shared/icons/icon.component';
 
 @Component({
   selector: 'app-alert',

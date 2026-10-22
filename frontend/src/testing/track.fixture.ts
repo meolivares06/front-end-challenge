@@ -1,4 +1,4 @@
-import { Track } from '../app/features/tracks/models/track.model';
+import { Track } from '@features/tracks/models/track.model';
 
 export function buildTrack(overrides: Partial<Track> = {}): Track {
   return {
