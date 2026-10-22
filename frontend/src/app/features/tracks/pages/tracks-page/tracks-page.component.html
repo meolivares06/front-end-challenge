@@ -2,36 +2,36 @@
   <div class="page-header__text">
     <h1>Faixas do contrato</h1>
     <p class="page-header__lead">
-      {{ isrcs.length }} gravações informadas pelo produtor, consultadas por ISRC na Spotify Web
-      API.
+      {{ store.isrcs.length }} gravações informadas pelo produtor, consultadas por ISRC na Spotify
+      Web API.
     </p>
   </div>
 
-  @if (state() === 'ready' && tracks().length) {
+  @if (store.state() === 'ready' && store.total()) {
     <div class="toolbar">
       <p class="summary" aria-live="polite">
-        <strong>{{ tracks().length }}</strong> faixas ·
-        <strong>{{ availableInBrazil() }}</strong> disponíveis no BR
+        <strong>{{ store.total() }}</strong> faixas ·
+        <strong>{{ store.availableInBrazil() }}</strong> disponíveis no BR
       </p>
       <button
         type="button"
         class="button button--ghost"
         (click)="toggleDirection()"
         [attr.aria-label]="
-          'Ordenar por título, ' + (direction() === 'asc' ? 'de Z a A' : 'de A a Z')
+          'Ordenar por título, ' + (store.direction() === 'asc' ? 'de Z a A' : 'de A a Z')
         "
       >
         <app-icon name="sort" [size]="18" />
-        Título {{ direction() === 'asc' ? 'A–Z' : 'Z–A' }}
+        Título {{ store.direction() === 'asc' ? 'A–Z' : 'Z–A' }}
       </button>
     </div>
   }
 </header>
 
-@switch (state()) {
+@switch (store.state()) {
   @case ('loading') {
     <div class="grid" aria-busy="true" aria-label="Carregando faixas">
-      @for (isrc of isrcs; track isrc) {
+      @for (isrc of store.isrcs; track isrc) {
         <app-track-skeleton />
       }
     </div>
@@ -41,7 +41,7 @@
     <app-alert
       heading="Não foi possível falar com o Spotify agora"
       actionLabel="Tentar de novo"
-      (action)="load()"
+      (action)="retry()"
     >
       A integração com o fornecedor dos dados está indisponível. Nenhuma faixa foi carregada; tente
       novamente em instantes.
@@ -50,22 +50,25 @@
 
   @case ('ready') {
     <div class="notices">
-      @if (hasNoPreviews()) {
+      @if (store.hasNoPreviews()) {
         <app-alert tone="info" heading="Prévias de áudio indisponíveis">
           O Spotify deixou de enviar o link de prévia (<code>preview_url</code>) para apps novos.
           Use o link de cada faixa para ouvir no Spotify.
         </app-alert>
       }
-      @if (notFound().length) {
-        <app-alert tone="info" heading="{{ notFound().length }} ISRC não encontrado no Spotify">
-          {{ notFound().join(', ') }}
+      @if (store.notFound().length) {
+        <app-alert
+          tone="info"
+          heading="{{ store.notFound().length }} ISRC não encontrado no Spotify"
+        >
+          {{ store.notFound().join(', ') }}
         </app-alert>
       }
     </div>
 
-    @if (sortedTracks().length) {
+    @if (store.tracks().length) {
       <ol class="grid" role="list">
-        @for (track of sortedTracks(); track track.isrc; let i = $index) {
+        @for (track of store.tracks(); track track.isrc; let i = $index) {
           <li
             class="grid__item"
             [style.--i]="i"

@@ -37,8 +37,9 @@ src/app/
 ├── features/tracks/          # tudo da funcionalidade "faixas" fica junto
 │   ├── components/           # track-card, audio-preview, track-skeleton
 │   ├── models/               # Track, SortDirection
-│   ├── pages/tracks-page/    # orquestra estado: loading | ready | error
-│   ├── services/             # TrackApiService (HTTP), AudioPreviewService
+│   ├── pages/tracks-page/    # apresentação: lê o store e repassa ações
+│   ├── services/             # TrackApiService (só requisições HTTP), AudioPreviewService
+│   ├── store/                # TracksStore: estado (signals) e ações da feature
 │   └── utils/                # lista de ISRCs, ordenação, formatação de data
 └── shared/                   # reutilizável entre features
     ├── components/alert/
@@ -46,6 +47,18 @@ src/app/
     ├── pipes/duration.pipe.ts
     └── utils/view-transition.ts
 ```
+
+Fluxo de dados (cada peça com uma responsabilidade):
+
+```
+TracksPageComponent ──lê signals / chama ações──▶ TracksStore ──▶ TrackApiService ──HTTP──▶ API
+```
+
+- **TrackApiService:** só sabe fazer requisições e traduzir erros HTTP (`404` → não encontrada, resto → integração indisponível).
+- **TracksStore:** guarda o estado (`state`, faixas, ISRCs não encontrados, direção da ordenação), expõe tudo como *signals* somente leitura e oferece as ações `load()` e `toggleDirection()`. É provido na própria página (`providers: [TracksStore]`), então o estado vive e morre com ela.
+- **Componentes:** não conhecem HTTP; o componente de página depende só do store.
+
+Aliases no `tsconfig.json`: `@shared/*`, `@features/*` e `@testing/*` para imports entre fronteiras. Dentro da mesma feature os imports seguem relativos.
 
 ### API
 
@@ -82,7 +95,7 @@ npm start                   # http://localhost:4200 (proxy /api → :3000)
 
 ```bash
 cd api && npm test          # unitários (token, regra BR) + integração HTTP com supertest
-cd frontend && npm test     # unitários (pipe, ordenação, datas) + integração (página + HTTP simulado)
+cd frontend && npm test     # unitários (pipe, ordenação, datas, store) + integração (página + HTTP simulado)
 ```
 
 Nos testes de integração só a borda externa é simulada (o `fetch` para o Spotify na API; o backend via `HttpTestingController` no Angular). O resto roda de verdade.
