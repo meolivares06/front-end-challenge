@@ -8,7 +8,9 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "lint:boundaries": "node scripts/verify-boundaries.mjs"
+    "lint:boundaries": "node scripts/verify-boundaries.mjs",
+    "test:coverage": "ng test --configuration=coverage --watch=false",
+    "test:ci": "ng test --watch=false"
   },
   "private": true,
   "packageManager": "npm@10.9.4",
@@ -28,6 +30,7 @@
     "@angular/build": "^21.2.27",
     "@angular/cli": "^21.2.27",
     "@angular/compiler-cli": "^21.2.0",
+    "@vitest/coverage-v8": "^4.1.12",
     "angular-eslint": "^21.4.0",
     "eslint": "^9.39.5",
     "jsdom": "^28.0.0",

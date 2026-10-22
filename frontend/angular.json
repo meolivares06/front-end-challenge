@@ -78,7 +78,33 @@
           }
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "coverageInclude": [
+                "src/app/features/*/utils/**/*.ts",
+                "src/app/features/*/models/**/*.ts",
+                "src/app/features/*/store/**/*.ts",
+                "src/app/shared/pipes/**/*.ts",
+                "src/app/shared/utils/**/*.ts"
+              ],
+              "coverageExclude": [
+                "**/*.spec.ts"
+              ],
+              "coverageReporters": [
+                "text",
+                "lcov"
+              ],
+              "coverageThresholds": {
+                "perFile": true,
+                "statements": 90,
+                "branches": 90,
+                "functions": 90,
+                "lines": 90
+              }
+            }
+          }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
