@@ -18,6 +18,7 @@ npm run lint:boundaries   # rode antes do lint: prova as fronteiras de arquitetu
 npm run lint
 npm run test:coverage     # exige 90% por arquivo em utils/models/store/shared
 npm run build
+npm run e2e               # Playwright: sobe API (mock) + ng serve; precisa de npm ci em api/
 npm start                 # http://localhost:4200, proxy /api → :3000
 ```
 

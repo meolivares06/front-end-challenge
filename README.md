@@ -120,12 +120,25 @@ As camadas da feature só podem depender em um sentido (`pages/components → st
 
 TypeScript em modo estrito ampliado: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` e `verbatimModuleSyntax`.
 
+## Testes E2E
+
+```bash
+cd api && npm install           # a API precisa das dependências instaladas
+cd frontend
+npx playwright install chromium # uma vez
+npm run e2e                     # sobe a API (mock) e o ng serve sozinho
+npm run e2e:ui                  # modo interativo
+```
+
+São 9 cenários rodando em **desktop** e **mobile** (Pixel 7) contra o stack real: navegador → `ng serve` → API em modo mock. Só a queda da integração é simulada no navegador. Detalhes em [docs/BITACORA.md](docs/BITACORA.md#17-testes-e2e).
+
 ## Integração contínua
 
-`.github/workflows/ci.yml` roda em cada PR, com dois jobs em paralelo:
+`.github/workflows/ci.yml` roda em cada PR:
 
 - **frontend:** fronteiras de arquitetura, lint, testes com cobertura e build.
 - **api:** testes com cobertura.
+- **e2e:** Playwright em desktop e mobile, só depois que os dois anteriores passam.
 
 Cada verificação é um passo separado, e os relatórios de cobertura ficam como artefatos. Detalhes em [docs/BITACORA.md](docs/BITACORA.md#12-integração-contínua-github-actions).
 

@@ -19,7 +19,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `e9d43fd` |
 | 14 | [Governança de IA](#14-governança-de-ia) | `a5365e3` `ea3c902` `0ede5fd` |
 | 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | `2bb31b4` `d93bde5` |
-| 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `dd4ea24` `8800c54` |
+| 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `dd4ea24` `8800c54` `d9e4ce6` |
+| 17 | [Testes E2E](#17-testes-e2e) | ver abaixo |
 
 ---
 
@@ -476,4 +477,41 @@ track.service.js ──────┤
 - **Ponta a ponta real** (build de produção + API em modo mock, sem rotas simuladas no navegador): a prévia toca (barra de progresso e `aria-pressed=true`), o cenário `down` mostra o alerta, e o AXE dá 0 violações em desktop e mobile nos dois cenários.
 
 **Na apresentação.** O impedimento (Premium) é externo e foi comunicado. O mock não esconde o problema: deixa o produto demonstrável sem mentir sobre os dados, e a troca para o real é uma variável de ambiente, não uma refatoração.
+
+---
+
+## 17. Testes E2E
+
+**Contexto.** Unitários e integração provam as peças. Faltava provar que **a tela que o usuário vê** cumpre o enunciado, num navegador real, em desktop e celular. O modo mock (seção 16) tornou isso possível sem credenciais e com dados determinísticos.
+
+**Decisão.** Playwright (`@playwright/test` 1.56) em `frontend/e2e/`, rodando contra o **stack real**:
+
+```
+Chromium ──▶ ng serve (proxy /api) ──▶ API em modo mock ──▶ catálogo fictício
+```
+
+- O `webServer` do `playwright.config.ts` sobe a API (`SPOTIFY_MODE=mock`, latência 0) e o `ng serve`. Um único comando: `npm run e2e`.
+- **Nada é simulado no navegador**, exceto a queda da integração: um `page.route` responde 503, como a API faria com o Spotify fora.
+- Dois projetos: **desktop** (Desktop Chrome) e **mobile** (Pixel 7, com touch).
+- **Page Object** (`tracks.page.ts`): os testes falam a língua da tela (`tracks.card('Golden Hour Drive')`), e os seletores ficam num lugar só. A busca é por papel e nome acessível (`getByRole`), o que também valida a acessibilidade.
+- Arquivos `*.e2e.ts`, para não se misturarem com os `*.spec.ts` do Vitest.
+
+**Cenários (9 × 2 dispositivos = 18 testes)**
+
+| Requisito do enunciado | Teste |
+|---|---|
+| Exibir as faixas; ISRC sem dados | Lista 9 faixas, aviso de demonstração, `QZNJX2078148` não encontrado |
+| Ordenação alfabética por título | A–Z conferida com `Intl.Collator('pt-BR')`; o botão inverte para Z–A |
+| Thumb, data, título, artistas, duração mm:ss, link | Card completo + regex `mm:ss` em todos os cards |
+| Disponível no BR | Disponível, `is_playable: false` e ausente no mercado BR |
+| Player com prévia | Toca (`aria-pressed=true` + barra de progresso) e pausa; desabilitado sem áudio |
+| Alerta se a integração cair | 503 → alerta → "Tentar de novo" → faixas carregadas |
+| Responsiva | Sem rolagem horizontal, nos dois dispositivos |
+| Acessibilidade (regra oficial do Angular) | AXE WCAG 2.0/2.1 A e AA: 0 violações |
+
+**Achado durante a implementação (vale contar na apresentação).** Na primeira execução, o AXE reprovou o contraste de vários textos. Investigando, as cores medidas (`#313336`, `#464749`) não existem na paleta: o AXE estava medindo **no meio da animação de entrada** (fade-in). Cheguei a subir o token `--text-faint`, mas a medição mostrou que não era necessário (4,9:1 sobre a superfície de hover) e **reverti**. A correção certa foi no teste: `waitForAnimations()` espera as animações terminarem antes de medir, como o usuário vê a página.
+
+**Estabilidade.** 18/18 em três execuções seguidas, duas delas com `CI=1` (servidores novos a cada vez, sem reaproveitar).
+
+**No CI.** Job `e2e` com `needs: [frontend, api]`: só roda se as verificações rápidas passarem, porque é o passo mais caro. Instala o Chromium com `playwright install --with-deps`. Em caso de falha, publica o relatório HTML, os traces e as screenshots como artefato (7 dias). No CI há 1 retry e `forbidOnly`, para um `test.only` esquecido não passar.
 

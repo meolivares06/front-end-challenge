@@ -19,6 +19,8 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 
 - **Modo mock** no BFF enquanto a conta Premium não é configurada: mesmo contrato do Spotify, catálogo fictício que cobre todos os estados da tela, prévias de áudio tocáveis e simulação de queda. Troca para dados reais só com variável de ambiente.
 
+- **Testes E2E** com Playwright (desktop e mobile) contra a API em modo mock, incluindo AXE e prévia de áudio tocando; job próprio no CI.
+
 ## Pontos de atenção (limitações atuais da API do Spotify)
 
 - `available_markets` foi removido em Development Mode (fev/2026) → disponibilidade no BR via `market=BR` + `is_playable`.
@@ -43,7 +45,6 @@ cd frontend && npm install && npm test && npm start   # http://localhost:4200
 
 - Camada de cache no store/API se a lista de ISRCs crescer.
 - Deploy da API + frontend (ex.: Vercel/Render) para a página ficar pública.
-- Testes E2E (Playwright).
 - Migrar as fronteiras para Sheriff quando houver uma segunda feature (gatilho documentado na bitácora).
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

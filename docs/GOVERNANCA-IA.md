@@ -165,7 +165,8 @@ Desde a v20, o Angular CLI gera arquivos **sem sufixo de tipo** (`app.ts`, class
 | "Desativar a regra para passar" | Proibição no `AGENTS.md` + revisão do diff de `eslint.config.js` no PR | `AGENTS.md`, CI |
 | `any`, índices sem checagem | TS estrito ampliado (`noUncheckedIndexedAccess`…) | `tsconfig.json` |
 | Lógica sem teste | Cobertura de 90% por arquivo na lógica pura | `test:coverage` |
-| Acessibilidade quebrada | `templateAccessibility` no lint + auditoria AXE | `eslint.config.js` |
+| Acessibilidade quebrada | `templateAccessibility` no lint + AXE nos testes E2E | `eslint.config.js`, `e2e/` |
+| Tela quebrada mesmo com unitários verdes | E2E no navegador real, desktop e mobile | `e2e/`, job `e2e` do CI |
 | Segredo no frontend | BFF; `.env` no `.gitignore` | `api/`, `.gitignore` |
 | Tudo acima ser ignorado | CI obrigatório em todo PR | `.github/workflows/ci.yml` |
 
