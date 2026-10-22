@@ -17,7 +17,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 11 | [Política de cobertura](#11-política-de-cobertura) | `e4f0ca7` `996414c` |
 | 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `e9db712` |
 | 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `e9d43fd` |
-| 14 | [Governança de IA](#14-governança-de-ia) | ver abaixo |
+| 14 | [Governança de IA](#14-governança-de-ia) | `a5365e3` `ea3c902` `0ede5fd` |
+| 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | ver abaixo |
 
 ---
 
@@ -398,4 +399,20 @@ Documento completo: **[docs/GOVERNANCA-IA.md](GOVERNANCA-IA.md)**.
 - As regras críticas não dependem do texto: são garantidas por lint, TypeScript estrito, cobertura, AXE e CI.
 
 **Por que gerar em vez de copiar.** O angular.dev já documenta a v22 (onde `OnPush` é padrão e não deve ser declarado), enquanto o projeto é v21. O arquivo gerado pelo CLI do projeto acompanha a versão instalada.
+
+---
+
+## 15. Skills do Angular e convenção de nomes
+
+**Contexto.** A doc de IA do Angular também oferece *agent skills* (`npx skills add https://github.com/angular/skills`). Ao analisá-las, apareceram duas coisas: elas descrevem a **v22**, e a referência de nomes revelou uma inconsistência nossa (o `app.ts` gerado pelo CLI, sem sufixo, convivia com os nossos `*.component.ts`).
+
+**Decisões**
+
+1. **Skills não adotadas:** recomendam APIs que não existem na v21 (`@Service()`, Signal Forms). As boas práticas da nossa versão já vêm do arquivo gerado pelo CLI 21 e do MCP fixado na 21. Reavaliar na migração para a v22.
+2. **Manter o estilo de nomes com sufixo de tipo**, configurado no `angular.json` (`type` / `typeSeparator` nos schematics), como o guia de estilo permite.
+3. **Corrigir a inconsistência:** `app.ts` → `app.component.ts` (`AppComponent`).
+
+**Verificar:** `npx ng g c x --dry-run` gera `x.component.ts`; build, testes, lint e fronteiras passam.
+
+Detalhes: [GOVERNANCA-IA.md §4.1 e §4.2](GOVERNANCA-IA.md#41-por-que-não-usamos-as-skills-oficiais-angularskills).
 

@@ -42,6 +42,7 @@ Antes de escrever o `AGENTS.md`, conferi a seção de IA do angular.dev ([Develo
 | **Regras de boas práticas** (`best-practices.md`) | O CLI 21 gera o arquivo com o schematic `ng g ai-config` (ferramentas: agents, claude, copilot, cursor, gemini, jetbrains, windsurf) | **Gerado sem edição** em `frontend/AGENTS.md`. Não copiamos essas regras para o nosso `AGENTS.md` |
 | **Servidor MCP do CLI** (`ng mcp`) | Existe no CLI 21.2 | **Ativado** em `.mcp.json`, com `--read-only` |
 | **`llms.txt` / `llms-full.txt`** | Índice da documentação para LLMs | Não versionado: o MCP (`search_documentation`) já consulta a doc oficial sob demanda |
+| **Agent skills** (`npx skills add https://github.com/angular/skills`) | Guias carregados sob demanda (`angular-developer` com 46 referências, `angular-new-app`) | **Não adotado.** Ver a seção 4.1 |
 
 **O que a conferência mudou no plano inicial** (baseado no artigo do Ortega Van, parte 3):
 
@@ -104,6 +105,46 @@ Para VS Code, o equivalente fica em `.vscode/mcp.json`, com a chave `"servers"` 
 
 ---
 
+## 4.1. Por que não usamos as skills oficiais (`angular/skills`)
+
+**O que são.** Pacotes de instruções que o agente carrega **só quando a tarefa pede** (ex.: "criar um formulário" carrega a referência de forms), ao contrário do `AGENTS.md`, que está sempre no contexto.
+
+**Por que ficaram de fora.** O repositório `angular/skills` é gerado a partir da branch principal do Angular e hoje descreve a **v22**. Exemplos encontrados na análise (commit `38d431e`):
+
+| A skill recomenda | Situação no Angular 21 |
+|---|---|
+| Decorador `@Service()` em vez de `@Injectable` | Não existe: o build falha |
+| Signal Forms para formulários novos | Estável só a partir da v22 |
+| Nomes sem sufixo (`track-card.ts`) | Opcional; o projeto escolheu o estilo com sufixo (seção 4.2) |
+
+A própria skill manda verificar a versão do projeto antes, mas instalar um guia que contradiz a versão em uso adiciona ruído e risco sem ganho: as boas práticas da **nossa** versão já vêm do `frontend/AGENTS.md` gerado pelo CLI 21 e do MCP fixado em `@angular/cli@21`.
+
+**Quando reavaliar.** Ao migrar para a v22, instalar fixando um commit (não `latest`) e revisar o diff a cada atualização.
+
+**Rede de segurança.** Mesmo que um agente sugira uma API da v22, o `ng build` do CI falha antes do merge.
+
+## 4.2. Convenção de nomes com sufixo de tipo
+
+Desde a v20, o Angular CLI gera arquivos **sem sufixo de tipo** (`app.ts`, classe `App`). O guia de estilo permite manter o estilo anterior **configurando o `angular.json`**, e foi o que fizemos:
+
+```jsonc
+// frontend/angular.json → projects.frontend.schematics
+"@schematics/angular:component": { "style": "scss", "type": "component" },
+"@schematics/angular:directive": { "type": "directive" },
+"@schematics/angular:service":   { "type": "service" },
+"@schematics/angular:pipe":        { "typeSeparator": "." },
+"@schematics/angular:guard":       { "typeSeparator": "." },
+"@schematics/angular:interceptor": { "typeSeparator": "." },
+"@schematics/angular:resolver":    { "typeSeparator": "." },
+"@schematics/angular:module":      { "typeSeparator": "." }
+```
+
+**Por quê:** o papel de cada arquivo fica visível no nome, o que favorece a leitura e a navegação. Além disso, a regra de fronteira do ESLint usa o sufixo `-api.service`.
+
+**Inconsistência corrigida:** o `app.ts` gerado pelo CLI virou `app.component.ts` (`AppComponent`). Agora todo o projeto segue um único estilo, e `ng generate` produz `*.component.ts`, `*.service.ts` e `*.pipe.ts` (verificado com `--dry-run`).
+
+---
+
 ## 5. O que o `AGENTS.md` do projeto contém, e por quê
 
 | Seção | Por quê |
@@ -112,7 +153,7 @@ Para VS Code, o equivalente fica em `.vscode/mcp.json`, com a chave `"servers"` 
 | **Arquitetura** em 5 linhas + link | O detalhe está na bitácora e é exigido pelo lint, então não precisa ser repetido |
 | **Decisões fora do padrão** | É onde um agente erraria seguindo as regras genéricas: store provido na página, sufixo `-api.service`, sem rotas, regra do BR |
 | **Proibido** | Limites que o lint não consegue expressar: segredos, exceções nas fronteiras, novas dependências, baixar cobertura, editar o arquivo gerado |
-| **Convenções** | Idioma de código, interface e commits; registrar decisões na bitácora |
+| **Convenções** | Nomes com sufixo de tipo, versão do Angular (sem APIs da v22), idioma de código/interface/commits, registro na bitácora |
 
 ---
 

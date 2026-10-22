@@ -48,6 +48,8 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 
 ## Convenções
 
+- Nomes com sufixo de tipo: `track-card.component.ts` (`TrackCardComponent`), `track-api.service.ts`, `duration.pipe.ts`. Use `ng generate`: o `angular.json` já está configurado para esse estilo.
+- O projeto é Angular **21**: não use APIs da v22 (`@Service()`, Signal Forms). As skills `angular/skills` não estão instaladas por isso.
 - Commits em Conventional Commits, em português: `feat(frontend): ...`, `test(api): ...`.
 - Código e nomes técnicos em inglês; textos da interface, documentação e commits em português.
 - Toda decisão relevante entra em `docs/BITACORA.md`: contexto, decisão, o que foi descartado e como verificar.
