@@ -1,0 +1,80 @@
+<header class="page-header">
+  <div class="page-header__text">
+    <h1>Faixas do contrato</h1>
+    <p class="page-header__lead">
+      {{ isrcs.length }} gravações informadas pelo produtor, consultadas por ISRC na Spotify Web
+      API.
+    </p>
+  </div>
+
+  @if (state() === 'ready' && tracks().length) {
+    <div class="toolbar">
+      <p class="summary" aria-live="polite">
+        <strong>{{ tracks().length }}</strong> faixas ·
+        <strong>{{ availableInBrazil() }}</strong> disponíveis no BR
+      </p>
+      <button
+        type="button"
+        class="button button--ghost"
+        (click)="toggleDirection()"
+        [attr.aria-label]="
+          'Ordenar por título, ' + (direction() === 'asc' ? 'de Z a A' : 'de A a Z')
+        "
+      >
+        <app-icon name="sort" [size]="18" />
+        Título {{ direction() === 'asc' ? 'A–Z' : 'Z–A' }}
+      </button>
+    </div>
+  }
+</header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="grid" aria-busy="true" aria-label="Carregando faixas">
+      @for (isrc of isrcs; track isrc) {
+        <app-track-skeleton />
+      }
+    </div>
+  }
+
+  @case ('error') {
+    <app-alert
+      heading="Não foi possível falar com o Spotify agora"
+      actionLabel="Tentar de novo"
+      (action)="load()"
+    >
+      A integração com o fornecedor dos dados está indisponível. Nenhuma faixa foi carregada; tente
+      novamente em instantes.
+    </app-alert>
+  }
+
+  @case ('ready') {
+    <div class="notices">
+      @if (hasNoPreviews()) {
+        <app-alert tone="info" heading="Prévias de áudio indisponíveis">
+          O Spotify deixou de enviar o link de prévia (<code>preview_url</code>) para apps novos.
+          Use o link de cada faixa para ouvir no Spotify.
+        </app-alert>
+      }
+      @if (notFound().length) {
+        <app-alert tone="info" heading="{{ notFound().length }} ISRC não encontrado no Spotify">
+          {{ notFound().join(', ') }}
+        </app-alert>
+      }
+    </div>
+
+    @if (sortedTracks().length) {
+      <ol class="grid" role="list">
+        @for (track of sortedTracks(); track track.isrc; let i = $index) {
+          <li
+            class="grid__item"
+            [style.--i]="i"
+            [style.view-transition-name]="'track-' + track.isrc"
+          >
+            <app-track-card [track]="track" />
+          </li>
+        }
+      </ol>
+    }
+  }
+}

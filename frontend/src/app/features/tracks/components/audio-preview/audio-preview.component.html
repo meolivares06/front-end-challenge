@@ -1,0 +1,26 @@
+<button
+  type="button"
+  class="preview"
+  [disabled]="!previewUrl()"
+  [attr.aria-label]="label()"
+  [attr.aria-pressed]="previewUrl() ? isPlaying() : null"
+  [title]="label()"
+  (click)="toggle()"
+>
+  <app-icon
+    [name]="!previewUrl() ? 'mute' : isPlaying() ? 'pause' : 'play'"
+    [size]="previewUrl() ? 22 : 18"
+  />
+</button>
+@if (isPlaying()) {
+  <div
+    class="progress"
+    role="progressbar"
+    aria-label="Progresso da prévia"
+    [attr.aria-valuenow]="progress() * 100 | number: '1.0-0'"
+    aria-valuemin="0"
+    aria-valuemax="100"
+  >
+    <span class="progress__bar" [style.transform]="'scaleX(' + progress() + ')'"></span>
+  </div>
+}
