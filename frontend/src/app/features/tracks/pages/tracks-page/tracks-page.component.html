@@ -17,9 +17,8 @@
         type="button"
         class="button button--ghost"
         (click)="toggleDirection()"
-        [attr.aria-label]="
-          'Ordenar por título, ' + (store.direction() === 'asc' ? 'de Z a A' : 'de A a Z')
-        "
+        [attr.aria-pressed]="store.direction() === 'desc'"
+        title="Inverter a ordem por título"
       >
         <app-icon name="sort" [size]="18" />
         Título {{ store.direction() === 'asc' ? 'A–Z' : 'Z–A' }}

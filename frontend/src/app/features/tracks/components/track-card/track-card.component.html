@@ -1,14 +1,7 @@
 @let t = track();
 <div class="card__art">
   @if (t.thumbnailUrl) {
-    <img
-      [src]="t.thumbnailUrl"
-      [alt]="'Capa do álbum ' + t.albumName"
-      width="300"
-      height="300"
-      loading="lazy"
-      decoding="async"
-    />
+    <img [ngSrc]="t.thumbnailUrl" [alt]="'Capa do álbum ' + t.albumName" width="300" height="300" />
   } @else {
     <div class="card__art-fallback" aria-hidden="true">{{ t.title.charAt(0) }}</div>
   }
