@@ -1,5 +1,7 @@
 # Faixas por ISRC · Spotify Web API
 
+> 📓 O passo a passo das decisões está em [docs/BITACORA.md](docs/BITACORA.md).
+
 Página pública que consulta **10 ISRCs** informados por um produtor na Spotify Web API e mostra, **ordenados por título (A–Z)**:
 
 | Requisito | Onde está |
@@ -90,6 +92,18 @@ npm start                   # http://localhost:4200 (proxy /api → :3000)
 ```
 
 > Os dois projetos têm `.npmrc` com `legacy-peer-deps=true` para contornar um bug do npm 10.9 na resolução de peers do Vitest 4.
+
+## Qualidade e fronteiras de arquitetura
+
+```bash
+cd frontend
+npm run lint                # ESLint (angular-eslint) + regras de fronteira entre camadas
+npm run lint:boundaries     # prova: simula um import proibido por fronteira e exige o bloqueio
+```
+
+As camadas da feature só podem depender em um sentido (`pages/components → store → services → models/utils`), e `shared` não conhece features. Detalhes em [docs/BITACORA.md](docs/BITACORA.md#9-proteção-contra-violações-de-arquitetura).
+
+TypeScript em modo estrito ampliado: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` e `verbatimModuleSyntax`.
 
 ## Testes
 

@@ -8,6 +8,10 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 - Alerta com "Tentar de novo" quando a integração está indisponível; aviso separado para ISRCs não encontrados.
 - Responsiva (grade → lista no celular) com transições que respeitam `prefers-reduced-motion`.
 
+- Fronteiras de arquitetura protegidas por ESLint (`npm run lint`), com prova executável (`npm run lint:boundaries`).
+- TypeScript estrito ampliado e modelos `readonly`.
+- Decisões registradas passo a passo em `docs/BITACORA.md`.
+
 ## Pontos de atenção (limitações atuais da API do Spotify)
 
 - `available_markets` foi removido em Development Mode (fev/2026) → disponibilidade no BR via `market=BR` + `is_playable`.
@@ -30,5 +34,6 @@ Para ver o alerta de indisponibilidade, basta parar a API e clicar em "Tentar de
 - Camada de cache no store/API se a lista de ISRCs crescer.
 - Deploy da API + frontend (ex.: Vercel/Render) para a página ficar pública.
 - Testes E2E (Playwright).
+- CI no GitHub Actions rodando lint, lint:boundaries e testes em cada PR.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
