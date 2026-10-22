@@ -17,6 +17,8 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 - Governança de IA: `AGENTS.md` do projeto + boas práticas oficiais geradas pelo Angular CLI, MCP do Angular em modo somente leitura (`docs/GOVERNANCA-IA.md`).
 - Conferência com as regras oficiais do Angular: `NgOptimizedImage` adotado e 0 violações AXE.
 
+- **Modo mock** no BFF enquanto a conta Premium não é configurada: mesmo contrato do Spotify, catálogo fictício que cobre todos os estados da tela, prévias de áudio tocáveis e simulação de queda. Troca para dados reais só com variável de ambiente.
+
 ## Pontos de atenção (limitações atuais da API do Spotify)
 
 - `available_markets` foi removido em Development Mode (fev/2026) → disponibilidade no BR via `market=BR` + `is_playable`.
@@ -27,12 +29,15 @@ Detalhes e links na seção **Decisões técnicas e limitações** do README.
 
 ## Como testar
 
+Não precisa de credenciais: sem elas, a API sobe em **modo mock** (dados fictícios, aviso visível na tela).
+
 ```bash
 cd api && cp .env.example .env && npm install && npm test && npm start
 cd frontend && npm install && npm test && npm start   # http://localhost:4200
 ```
 
-Para ver o alerta de indisponibilidade, basta parar a API e clicar em "Tentar de novo".
+- Alerta de integração indisponível: `SPOTIFY_MOCK_SCENARIO=down` no `api/.env` e reiniciar a API (ou simplesmente parar a API e clicar em "Tentar de novo").
+- Spotify real: `SPOTIFY_MODE=live` + credenciais (exige Premium na conta dona do app).
 
 ## Próximos passos (próxima iteração)
 

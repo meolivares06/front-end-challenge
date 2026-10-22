@@ -76,12 +76,12 @@ Endpoints: `GET /api/tracks/:isrc` → `200` faixa · `400` ISRC inválido · `4
 
 ## Como rodar
 
-Pré-requisitos: **Node 22+** e um app no [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+Pré-requisito: **Node 22+**. Para dados reais, também um app no [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), com Premium na conta dona do app.
 
 ```bash
 # 1) API
 cd api
-cp .env.example .env        # preencha SPOTIFY_CLIENT_ID e SPOTIFY_CLIENT_SECRET
+cp .env.example .env        # SPOTIFY_MODE=mock já vem configurado
 npm install
 npm start                   # http://localhost:3000
 
@@ -90,6 +90,21 @@ cd frontend
 npm install
 npm start                   # http://localhost:4200 (proxy /api → :3000)
 ```
+
+### Modo mock (demonstração) e modo live
+
+Enquanto a conta Premium não é configurada, a API roda em **modo mock**: responde no mesmo formato do Spotify com um catálogo **fictício** para os 10 ISRCs do contrato, e a página mostra o aviso *"Modo demonstração: dados fictícios"*.
+
+| Variável (`api/.env`) | Valores | Efeito |
+|---|---|---|
+| `SPOTIFY_MODE` | `mock` \| `live` | Origem dos dados. Sem a variável: `live` se houver credenciais, `mock` caso contrário |
+| `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET` | credenciais do app | Obrigatórias em `live` |
+| `SPOTIFY_MOCK_SCENARIO` | `ok` \| `down` | `down` simula o Spotify fora do ar (demonstra o alerta de integração indisponível) |
+| `SPOTIFY_MOCK_LATENCY_MS` | número (padrão 400) | Latência simulada, para ver o carregamento |
+
+Para usar o Spotify real: `SPOTIFY_MODE=live`, preencher as credenciais e reiniciar a API. **Nada muda no frontend.**
+
+O catálogo do mock cobre de propósito todos os estados da tela: disponível no BR (com e sem prévia), `is_playable: false`, ausente no mercado BR, ISRC não encontrado e datas com precisão de ano ou mês. As capas (SVG) e as prévias de áudio (WAV) são geradas pela própria API.
 
 > Os dois projetos têm `.npmrc` com `legacy-peer-deps=true` para contornar um bug do npm 10.9 na resolução de peers do Vitest 4.
 

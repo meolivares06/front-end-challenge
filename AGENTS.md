@@ -10,7 +10,7 @@ Boas práticas gerais de Angular: [`frontend/AGENTS.md`](frontend/AGENTS.md), ge
 npm ci
 npm test                  # unitários + integração HTTP
 npm run test:coverage     # exige 90% por arquivo na regra de negócio
-npm start                 # precisa de api/.env (copie de .env.example)
+npm start                 # api/.env a partir de .env.example; SPOTIFY_MODE=mock dispensa credenciais
 
 # Frontend — frontend/
 npm ci
@@ -37,6 +37,7 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 - O serviço de requisições termina em `-api.service.ts`. A regra de fronteira depende desse sufixo.
 - Não há rotas: a aplicação é uma página só, então "lazy loading de rotas" não se aplica.
 - Disponibilidade no BR: busca com `market=BR` + `is_playable` (`available_markets` não existe em Dev Mode).
+- Modo mock (`api/src/mock/`): implementa o mesmo contrato do cliente real (`findTrackByIsrc`). Novos cenários entram no catálogo fictício, nunca como `if (mock)` no serviço, na regra ou no frontend.
 
 ## Proibido
 

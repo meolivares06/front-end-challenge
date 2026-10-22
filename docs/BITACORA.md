@@ -18,7 +18,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `e9db712` |
 | 13 | [Parte 3 do artigo e conferência com a doc do Angular](#13-parte-3-do-artigo-e-conferência-com-a-doc-do-angular) | `e9d43fd` |
 | 14 | [Governança de IA](#14-governança-de-ia) | `a5365e3` `ea3c902` `0ede5fd` |
-| 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | ver abaixo |
+| 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | `2bb31b4` `d93bde5` |
+| 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `dd4ea24` `8800c54` |
 
 ---
 
@@ -415,4 +416,64 @@ Documento completo: **[docs/GOVERNANCA-IA.md](GOVERNANCA-IA.md)**.
 **Verificar:** `npx ng g c x --dry-run` gera `x.component.ts`; build, testes, lint e fronteiras passam.
 
 Detalhes: [GOVERNANCA-IA.md §4.1 e §4.2](GOVERNANCA-IA.md#41-por-que-não-usamos-as-skills-oficiais-angularskills).
+
+---
+
+## 16. Modo mock até a conta Premium
+
+**Contexto.** A integração real depende de uma conta Spotify **Premium** dona do app (exigência do Development Mode desde fev/2026, seção 1). Até essa configuração chegar, a página não teria dados para mostrar, e o restante do trabalho (interface, estados, arquitetura) não poderia ser demonstrado.
+
+**Decisão.** Um **modo mock no BFF**, não no frontend.
+
+```
+                        ┌─ SPOTIFY_MODE=live ─▶ spotify.client.js ──▶ api.spotify.com
+track.service.js ──────┤
+ (mesma regra do BR,    └─ SPOTIFY_MODE=mock ─▶ mock-spotify.client.js ──▶ catálogo fictício
+  mesmo mapper)                                                         + capas SVG / prévias WAV
+```
+
+**Por que no BFF**
+
+| Critério | Mock no BFF (escolhido) | Mock no frontend (interceptor ou fixtures) |
+|---|---|---|
+| Código exercitado na demo | Serviço, regra do BR, mapper, rotas e HTTP reais; só a última borda é trocada | A API inteira fica de fora |
+| Frontend | **Zero mudança** para trocar de modo | Precisa de flag de build ou de ambiente |
+| Troca para dados reais | Uma variável de ambiente, sem rebuild | Novo build |
+| Risco de ir para produção por engano | Baixo: o modo aparece no log, no `/api/health` e na tela | Fixtures ficam no bundle |
+
+**Princípios aplicados**
+
+- **Substituição de Liskov / inversão de dependência:** o cliente mock implementa o mesmo contrato do real (`findTrackByIsrc(isrc, market)`). O `track.service.js` não sabe qual recebe, e a escolha acontece em um único lugar (`server.js`, a composição).
+- **Sem `if (mock)` espalhado:** nenhum serviço, regra ou componente testa o modo. Novos cenários entram no catálogo.
+- **Transparência:** o modo nunca é silencioso.
+  - A API responde `X-Data-Source: mock` em todas as respostas, e o `/api/health` informa `dataSource`.
+  - O log de inicialização avisa *"⚠ Modo MOCK: dados fictícios"*.
+  - A página mostra *"Modo demonstração: dados fictícios"*. O frontend só **lê** o cabeçalho: não decide nada.
+- **Dados honestos:** os ISRCs são os do contrato; títulos, artistas e álbuns são **inventados** e não imitam gravações reais.
+
+**Catálogo pensado para cobrir todos os estados da tela**
+
+| ISRC | Cenário |
+|---|---|
+| `BR1SP1200071`, `BXKZM1900345`, `NO1R42511410` | Disponível no BR, sem prévia |
+| `BRC310600002`, `BR1SP1200070`, `BXKZM1900338` | Disponível no BR, **com prévia tocável** |
+| `BR1SP1500002` | `is_playable: false` no mercado BR |
+| `NO1R42509310`, `QZNJX2081700` | Ausente no mercado BR (indisponível) |
+| `QZNJX2078148` | Não encontrado (404) |
+| `BRC310600002` / `QZNJX2081700` | Data com precisão de ano / mês |
+
+**Recursos gerados pela própria API (sem rede, sem arquivos binários no repositório)**
+
+- Capas em **SVG**, com cor e composição derivadas do hash do ISRC: sempre a mesma por faixa.
+- Prévias em **WAV** (8 s, arpejo pentatônico também derivado do ISRC), servidas em `/api/mock/previews/:isrc.wav`. Elas demonstram o player funcionando, o que o Spotify real não permite hoje, porque `preview_url` vem nulo.
+
+**Configuração** (`api/.env`): `SPOTIFY_MODE=mock|live`; `SPOTIFY_MOCK_SCENARIO=down` para simular a queda; `SPOTIFY_MOCK_LATENCY_MS` para ver o carregamento. Sem `SPOTIFY_MODE`, o padrão é `live` com credenciais e `mock` sem elas.
+
+**Verificação**
+
+- `api`: 29 testes. Os do mock passam pelo **mesmo** serviço e mapper do modo real e cobrem cabeçalho, os três casos de disponibilidade, 404, queda simulada, latência, SVG e WAV válidos. O mock entrou na política de cobertura de 90%.
+- `frontend`: 23 testes, entre eles leitura do cabeçalho, `source` no store e o aviso aparecendo **só** em modo mock.
+- **Ponta a ponta real** (build de produção + API em modo mock, sem rotas simuladas no navegador): a prévia toca (barra de progresso e `aria-pressed=true`), o cenário `down` mostra o alerta, e o AXE dá 0 violações em desktop e mobile nos dois cenários.
+
+**Na apresentação.** O impedimento (Premium) é externo e foi comunicado. O mock não esconde o problema: deixa o produto demonstrável sem mentir sobre os dados, e a troca para o real é uma variável de ambiente, não uma refatoração.
 
