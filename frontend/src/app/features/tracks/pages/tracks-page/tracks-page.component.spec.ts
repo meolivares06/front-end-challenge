@@ -71,6 +71,9 @@ describe('TracksPageComponent (integração)', () => {
     await fixture.whenStable();
 
     expect(el.textContent).toContain('Modo demonstração: dados fictícios');
+    // Aviso informativo não interrompe o leitor de tela: role=status, não alert.
+    expect(el.querySelector('[role="alert"]')).toBeNull();
+    expect(el.querySelectorAll('[role="status"]').length).toBeGreaterThan(0);
   });
 
   it('não mostra o aviso de demonstração com dados reais do Spotify', async () => {

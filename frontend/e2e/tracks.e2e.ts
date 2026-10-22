@@ -49,7 +49,7 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await expect(tracks.card('Maré de Março')).toContainText('2006'); // data com precisão de ano
   });
 
-  test('toca e pausa a prévia de áudio', async ({ page }) => {
+  test('toca e pausa a prévia de áudio', async () => {
     const card = tracks.card('Golden Hour Drive');
     const play = card.getByRole('button', { name: /prévia/ });
 
@@ -57,8 +57,9 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await play.click();
     await expect(play).toHaveAttribute('aria-pressed', 'true');
     await expect(card.getByRole('progressbar')).toBeVisible();
+    // Prova que o áudio de fato toca: o progresso vem do evento timeupdate do <audio>.
     await expect
-      .poll(() => page.evaluate(() => [...document.querySelectorAll('audio')].length || 1))
+      .poll(async () => Number(await card.getByRole('progressbar').getAttribute('aria-valuenow')))
       .toBeGreaterThan(0);
 
     await play.click();

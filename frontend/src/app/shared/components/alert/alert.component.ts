@@ -7,7 +7,11 @@ import { IconComponent } from '@shared/icons/icon.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.scss',
-  host: { role: 'alert', '[class]': '"alert alert--" + tone()' },
+  host: {
+    // Erro interrompe o leitor de tela (alert); aviso informativo espera a vez (status).
+    '[attr.role]': 'tone() === "danger" ? "alert" : "status"',
+    '[class]': '"alert alert--" + tone()',
+  },
 })
 export class AlertComponent {
   readonly tone = input<'danger' | 'info'>('danger');

@@ -11,7 +11,7 @@ export class TracksPage {
     this.cards = page.locator('app-track-card');
     this.titles = page.locator('app-track-card h2');
     this.sortButton = page.getByRole('button', { name: /Título/ });
-    this.alerts = page.getByRole('alert');
+    this.alerts = page.locator('app-alert');
   }
 
   async open(): Promise<void> {
