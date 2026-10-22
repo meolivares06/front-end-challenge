@@ -9,3 +9,6 @@ coverage/
 # Playwright
 frontend/test-results/
 frontend/playwright-report/
+
+# Build do Angular copiado no deploy (Vercel serve public/ pela CDN)
+api/public/
