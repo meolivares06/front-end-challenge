@@ -19,8 +19,8 @@ export class TracksStore {
   private request?: Subscription;
 
   private readonly _state = signal<LoadState>('idle');
-  private readonly _tracks = signal<Track[]>([]);
-  private readonly _notFound = signal<string[]>([]);
+  private readonly _tracks = signal<readonly Track[]>([]);
+  private readonly _notFound = signal<readonly string[]>([]);
   private readonly _direction = signal<SortDirection>('asc');
 
   readonly isrcs = CONTRACT_ISRCS;

@@ -2,23 +2,23 @@ export type ReleaseDatePrecision = 'year' | 'month' | 'day';
 
 /** Contrato devolvido pela API (BFF) para cada ISRC. */
 export interface Track {
-  isrc: string;
-  title: string;
-  artists: string[];
-  albumName: string;
-  albumImageUrl: string | null;
-  thumbnailUrl: string | null;
-  releaseDate: string | null;
-  releaseDatePrecision: ReleaseDatePrecision;
-  durationMs: number;
-  previewUrl: string | null;
-  spotifyUrl: string | null;
-  availableInBrazil: boolean;
+  readonly isrc: string;
+  readonly title: string;
+  readonly artists: readonly string[];
+  readonly albumName: string;
+  readonly albumImageUrl: string | null;
+  readonly thumbnailUrl: string | null;
+  readonly releaseDate: string | null;
+  readonly releaseDatePrecision: ReleaseDatePrecision;
+  readonly durationMs: number;
+  readonly previewUrl: string | null;
+  readonly spotifyUrl: string | null;
+  readonly availableInBrazil: boolean;
 }
 
 export type SortDirection = 'asc' | 'desc';
 
 export interface TracksResult {
-  tracks: Track[];
-  notFound: string[];
+  readonly tracks: readonly Track[];
+  readonly notFound: readonly string[];
 }
