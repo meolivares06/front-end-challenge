@@ -105,11 +105,21 @@ As camadas da feature só podem depender em um sentido (`pages/components → st
 
 TypeScript em modo estrito ampliado: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` e `verbatimModuleSyntax`.
 
+## Integração contínua
+
+`.github/workflows/ci.yml` roda em cada PR, com dois jobs em paralelo:
+
+- **frontend:** fronteiras de arquitetura, lint, testes com cobertura e build.
+- **api:** testes com cobertura.
+
+Cada verificação é um passo separado, e os relatórios de cobertura ficam como artefatos. Detalhes em [docs/BITACORA.md](docs/BITACORA.md#12-integração-contínua-github-actions).
+
 ## Testes
 
 ```bash
-cd api && npm test          # unitários (token, regra BR) + integração HTTP com supertest
-cd frontend && npm test     # unitários (pipe, ordenação, datas, store) + integração (página + HTTP simulado)
+cd api && npm test               # unitários (token, regra BR, mapper) + integração HTTP com supertest
+cd frontend && npm test          # unitários (pipe, ordenação, datas, store) + integração (página + HTTP simulado)
+npm run test:coverage            # em cada projeto: exige 90% por arquivo na lógica pura
 ```
 
 Nos testes de integração só a borda externa é simulada (o `fetch` para o Spotify na API; o backend via `HttpTestingController` no Angular). O resto roda de verdade.

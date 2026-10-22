@@ -13,6 +13,9 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 7 | [TypeScript estrito](#7-typescript-estrito) | `b444ce3` |
 | 8 | [Imutabilidade e regra de negócio pura](#8-imutabilidade-e-regra-de-negócio-pura) | `0d9f0dd` |
 | 9 | [Proteção contra violações de arquitetura](#9-proteção-contra-violações-de-arquitetura) | `7e16657` |
+| 10 | [Decisão: ESLint agora, Sheriff depois](#10-decisão-eslint-agora-sheriff-depois) | — |
+| 11 | [Política de cobertura](#11-política-de-cobertura) | `e4f0ca7` `996414c` |
+| 12 | [Integração contínua (GitHub Actions)](#12-integração-contínua-github-actions) | `e9db712` |
 
 ---
 
@@ -174,7 +177,7 @@ TracksPageComponent ──▶ TracksStore ──▶ TrackApiService ──HTTP�
 
 ## 9. Proteção contra violações de arquitetura
 
-**Contexto.** Até aqui as camadas dependiam de disciplina e code review. O artigo aponta essa lacuna e propõe resolvê-la na parte 2.
+**Contexto.** Até aqui as camadas dependiam de disciplina e code review. A parte 1 do artigo aponta essa lacuna, e a [parte 2](https://medium.com/@ortegavan/como-eu-configuro-um-projeto-greenfield-em-angular-parte-2-03b918a8d914) a resolve com Sheriff (ver a seção 10).
 
 **Decisão.** ESLint (`angular-eslint` 21) com `no-restricted-imports` **por camada**. Um import proibido quebra `npm run lint`.
 
@@ -211,4 +214,146 @@ src/app/features/tracks/components/track-card/track-card.component.ts
               Componentes acessam dados só pelo store da feature (features/<feature>/store)
 ```
 
-**Próximo passo natural.** Rodar `npm run lint`, `npm run lint:boundaries` e `npm test` num pipeline de CI (GitHub Actions) para cada PR.
+**Próximo passo.** Executar essas verificações automaticamente em cada PR (seção 12).
+
+---
+
+## 10. Decisão: ESLint agora, Sheriff depois
+
+**Contexto.** A [parte 2 do artigo](https://medium.com/@ortegavan/como-eu-configuro-um-projeto-greenfield-em-angular-parte-2-03b918a8d914) protege as fronteiras com o **Sheriff** (`@softarc/sheriff-core` + `@softarc/eslint-plugin-sheriff`). Ele define módulos por pasta com **tags** (`type:feature`, `type:data`, `domain:<nome>`…) e regras de dependência entre tags (`depRules`). Também verifica **encapsulamento**: cada módulo só é consumido pelo seu ponto de entrada.
+
+**Comparação**
+
+| Critério | ESLint `no-restricted-imports` (atual) | Sheriff |
+|---|---|---|
+| Base da verificação | Texto do import (regex) | Grafo real de imports resolvidos |
+| Depende de convenção de nome | Sim: o serviço precisa se chamar `*-api.service` | Não: a regra é por pasta/tag |
+| Isolamento entre features | Não coberto (há uma só feature) | `domain:*` → `sameTag` |
+| Encapsulamento (ponto de entrada) | Não | Sim |
+| Ferramentas e configuração novas | Nenhuma além do ESLint | `sheriff.config.ts` + plugin |
+| Legibilidade das regras | Uma tabela em `eslint.config.js` | Tags e `depRules` |
+
+**Decisão.** Manter ESLint com `no-restricted-imports` enquanto houver **uma única feature**. As regras atuais cobrem todas as fronteiras que existem hoje, e `npm run lint:boundaries` as prova.
+
+**Limitações aceitas, de forma consciente**
+
+- A regra "componente não acessa serviço de requisição" depende do sufixo `-api.service`. Um `spotify.gateway.ts` escaparia. A mitigação é a convenção de nomes documentada aqui e revisada no PR.
+- Não há verificação de encapsulamento, porque não usamos barrels (`index.ts`). Hoje isso é intencional: só há fronteiras entre camadas, não entre módulos publicados.
+
+**Gatilho para migrar.** Quando entrar a **segunda feature** (ex.: `artists/`), ou quando uma feature precisar consumir outra, migrar para Sheriff com:
+
+```ts
+// sheriff.config.ts (esboço)
+modules: {
+  'src/app/features/<domain>/pages':      ['domain:<domain>', 'type:feature'],
+  'src/app/features/<domain>/components': ['domain:<domain>', 'type:ui'],
+  'src/app/features/<domain>/store':      ['domain:<domain>', 'type:state'],
+  'src/app/features/<domain>/services':   ['domain:<domain>', 'type:data'],
+  'src/app/features/<domain>/utils':      ['domain:<domain>', 'type:domain-logic'],
+  'src/app/shared/<name>':                ['domain:shared', 'type:util'],
+},
+depRules: {
+  'domain:*': [sameTag, 'domain:shared'],
+  'type:feature': ['type:ui', 'type:state', 'type:domain-logic', 'type:util'],
+  'type:ui': ['type:domain-logic', 'type:util'],
+  'type:state': ['type:data', 'type:domain-logic', 'type:util'],
+  'type:data': ['type:domain-logic', 'type:util'],
+  'type:domain-logic': ['type:util'],
+  'type:util': noDependencies,
+}
+```
+
+A migração mantém o passo "Fronteiras de arquitetura" do CI; só troca o comando (`sheriff verify`).
+
+**Outros pontos da parte 2 que não se aplicam**
+
+- TypeScript 6 e pnpm: o Angular 21 fixa a própria versão do TypeScript, e usamos npm.
+- `main.ts` temporário na raiz: o autor ainda não tinha aplicação; nós temos.
+
+---
+
+## 11. Política de cobertura
+
+**Referência.** A parte 2 do artigo propõe **90% só na lógica de domínio**, sem exigência para as telas: cobertura é ferramenta, não meta.
+
+**Decisão**
+
+| Projeto | Arquivos com limite de 90% (por arquivo) | Fora do limite |
+|---|---|---|
+| frontend | `features/*/utils`, `features/*/models`, `features/*/store`, `shared/pipes`, `shared/utils` | componentes e páginas, cobertos pelo teste de integração da página |
+| api | `brazil-availability`, `track.mapper`, `track.service`, `token.service` | `server.js` (composição) e rotas, cobertas pelo teste de integração HTTP |
+
+- O limite vale **por arquivo** (`perFile: true`): um arquivo bem testado não esconde outro sem teste.
+- Frontend: configuração `coverage` do builder `@angular/build:unit-test` (`npm run test:coverage`).
+- API: `vitest.config.js` (`npm run test:coverage`).
+
+**Evidência de que funciona.** Ao ligar o limite, ele **reprovou de imediato** dois arquivos reais:
+
+```
+ERROR: Coverage for lines (0%) does not meet global threshold (90%) for src/app/shared/utils/view-transition.ts
+ERROR: Coverage for branches (55.55%) does not meet global threshold (90%) for src/tracks/track.mapper.js
+```
+
+Os testes criados cobrem os casos que faltavam: movimento reduzido e navegador sem suporte a View Transitions; faixa sem álbum, sem imagem, sem prévia ou sem link.
+
+**Resultado atual**
+
+| Projeto | Testes | Statements | Branches | Functions | Lines |
+|---|---|---|---|---|---|
+| frontend | 20 | 100% | 97,7% | 100% | 100% |
+| api | 18 | 96,2% | 100% | 100% | 95,8% |
+
+---
+
+## 12. Integração contínua (GitHub Actions)
+
+**Arquivo.** `.github/workflows/ci.yml`
+
+**Quando roda.** Em todo `pull_request` e em `push` na `main`. Um novo push na mesma branch **cancela** a execução anterior (`concurrency`). O token do workflow tem permissão só de leitura (`permissions: contents: read`).
+
+**Estrutura.** Dois jobs **em paralelo**, cada um no seu diretório (`defaults.run.working-directory`):
+
+```
+ci
+├── frontend (Angular)                      ├── api (BFF)
+│   1. checkout                             │   1. checkout
+│   2. Node 22 + cache do npm               │   2. Node 22 + cache do npm
+│   3. npm ci                               │   3. npm ci
+│   4. Fronteiras de arquitetura            │   4. Testes + cobertura (≥ 90%)
+│   5. Lint                                 │   5. Artefato: coverage-api
+│   6. Testes + cobertura (≥ 90%)           │
+│   7. Build de produção                    │
+│   8. Artefato: coverage-frontend          │
+```
+
+**Decisões**
+
+| Decisão | Motivo |
+|---|---|
+| **Fronteiras em passo separado do lint** (ideia da parte 2) | No PR, "violou a arquitetura" fica distinto de "erro de estilo" |
+| Ordem: fronteiras → lint → testes → build | Falha primeiro o que é mais barato e mais estrutural |
+| `npm ci` com o lockfile | Instalação reprodutível; falha se o `package-lock.json` divergir |
+| Cache do npm por projeto (`cache-dependency-path`) | Cada lockfile tem o seu cache |
+| Jobs paralelos por projeto | Frontend e API são independentes; o feedback chega mais rápido |
+| Relatório de cobertura como artefato, mesmo em falha (`if: always()`) | Dá para baixar o `lcov` e ver o que ficou sem teste |
+| Node 22 | A mesma versão do desenvolvimento local |
+| Sem segredos do Spotify no CI | Os testes simulam só a borda (`fetch`/HTTP), então não dependem do Spotify nem do Premium |
+
+**Validação local.** Antes do commit, o pipeline foi reproduzido numa cópia limpa do repositório (sem `node_modules`), com os mesmos comandos:
+
+```
+api       npm ci → test:coverage                 18 testes ✔  cobertura ✔
+frontend  npm ci → lint:boundaries                7/7 fronteiras protegidas ✔
+                 → lint                           All files pass linting ✔
+                 → test:coverage                  20 testes ✔  cobertura ✔
+                 → build                          bundle gerado ✔
+```
+
+**Como reproduzir localmente.** São os mesmos comandos do CI:
+
+```bash
+cd api && npm ci && npm run test:coverage
+cd frontend && npm ci && npm run lint:boundaries && npm run lint && npm run test:coverage && npm run build
+```
+
+**Para ativar no GitHub.** Basta o arquivo estar no repositório: no fork, a aba **Actions** passa a mostrar o workflow `ci` em cada PR. Opcionalmente, em *Settings → Branches*, marcar os jobs `Frontend (Angular)` e `API (BFF)` como **checks obrigatórios** para o merge.
