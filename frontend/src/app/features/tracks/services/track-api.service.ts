@@ -1,7 +1,7 @@
-import { HttpClient, type HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, type HttpErrorResponse, type HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, type Observable, of, throwError } from 'rxjs';
-import type { Track, TracksResult } from '../models/track.model';
+import type { DataSource, Track, TracksResult } from '../models/track.model';
 
 /** Erro lançado quando o fornecedor de dados (Spotify, via API) não está disponível. */
 export class IntegrationUnavailableError extends Error {
@@ -14,7 +14,12 @@ export class IntegrationUnavailableError extends Error {
 interface Lookup {
   isrc: string;
   track: Track | null;
+  source: DataSource;
 }
+
+/** A API informa a origem dos dados no cabeçalho X-Data-Source. */
+const readSource = (headers: HttpHeaders): DataSource =>
+  headers.get('X-Data-Source') === 'mock' ? 'mock' : 'spotify';
 
 @Injectable({ providedIn: 'root' })
 export class TrackApiService {
@@ -30,18 +35,21 @@ export class TrackApiService {
       map((lookups) => ({
         tracks: lookups.flatMap(({ track }) => (track ? [track] : [])),
         notFound: lookups.filter(({ track }) => !track).map(({ isrc }) => isrc),
+        source: lookups.some(({ source }) => source === 'mock') ? 'mock' : 'spotify',
       })),
     );
   }
 
   private lookup(isrc: string): Observable<Lookup> {
-    return this.http.get<Track>(`${this.baseUrl}/${encodeURIComponent(isrc)}`).pipe(
-      map((track) => ({ isrc, track })),
-      catchError((error: HttpErrorResponse) =>
-        error.status === 404
-          ? of({ isrc, track: null })
-          : throwError(() => new IntegrationUnavailableError()),
-      ),
-    );
+    return this.http
+      .get<Track>(`${this.baseUrl}/${encodeURIComponent(isrc)}`, { observe: 'response' })
+      .pipe(
+        map((response) => ({ isrc, track: response.body, source: readSource(response.headers) })),
+        catchError((error: HttpErrorResponse) =>
+          error.status === 404
+            ? of({ isrc, track: null, source: readSource(error.headers) })
+            : throwError(() => new IntegrationUnavailableError()),
+        ),
+      );
   }
 }

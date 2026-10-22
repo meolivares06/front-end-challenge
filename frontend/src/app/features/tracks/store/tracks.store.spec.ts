@@ -25,6 +25,7 @@ describe('TracksStore', () => {
           buildTrack({ isrc: 'A', title: 'Água' }),
         ],
         notFound: ['X'],
+        source: 'mock',
       }),
     );
 
@@ -35,6 +36,7 @@ describe('TracksStore', () => {
     expect(store.availableInBrazil()).toBe(1);
     expect(store.notFound()).toEqual(['X']);
     expect(store.hasNoPreviews()).toBe(true);
+    expect(store.source()).toBe('mock');
   });
 
   it('fica em loading enquanto a requisição não termina', () => {
@@ -62,6 +64,7 @@ describe('TracksStore', () => {
           buildTrack({ isrc: 'B', title: 'Zebra' }),
         ],
         notFound: [],
+        source: 'spotify',
       }),
     );
     store.load();

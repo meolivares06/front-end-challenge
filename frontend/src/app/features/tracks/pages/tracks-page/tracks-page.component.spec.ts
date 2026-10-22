@@ -61,4 +61,24 @@ describe('TracksPageComponent (integração)', () => {
     await fixture.whenStable();
     expect(http.match(() => true).filter((r) => !r.cancelled).length).toBe(CONTRACT_ISRCS.length);
   });
+
+  it('avisa que os dados são fictícios quando a API está em modo mock', async () => {
+    respondAll((isrc) =>
+      http
+        .expectOne(`/api/tracks/${isrc}`)
+        .flush(buildTrack({ isrc, title: isrc }), { headers: { 'X-Data-Source': 'mock' } }),
+    );
+    await fixture.whenStable();
+
+    expect(el.textContent).toContain('Modo demonstração: dados fictícios');
+  });
+
+  it('não mostra o aviso de demonstração com dados reais do Spotify', async () => {
+    respondAll((isrc) =>
+      http.expectOne(`/api/tracks/${isrc}`).flush(buildTrack({ isrc, title: isrc })),
+    );
+    await fixture.whenStable();
+
+    expect(el.textContent).not.toContain('Modo demonstração');
+  });
 });

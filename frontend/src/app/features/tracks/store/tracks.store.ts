@@ -1,7 +1,7 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { type Subscription } from 'rxjs';
-import type { SortDirection, Track } from '../models/track.model';
+import type { DataSource, SortDirection, Track } from '../models/track.model';
 import { TrackApiService } from '../services/track-api.service';
 import { CONTRACT_ISRCS } from '../utils/contract-isrcs';
 import { sortTracksByTitle } from '../utils/sort-tracks';
@@ -22,11 +22,13 @@ export class TracksStore {
   private readonly _tracks = signal<readonly Track[]>([]);
   private readonly _notFound = signal<readonly string[]>([]);
   private readonly _direction = signal<SortDirection>('asc');
+  private readonly _source = signal<DataSource | null>(null);
 
   readonly isrcs = CONTRACT_ISRCS;
   readonly state = this._state.asReadonly();
   readonly notFound = this._notFound.asReadonly();
   readonly direction = this._direction.asReadonly();
+  readonly source = this._source.asReadonly();
 
   readonly tracks = computed(() => sortTracksByTitle(this._tracks(), this._direction()));
   readonly total = computed(() => this._tracks().length);
@@ -44,14 +46,16 @@ export class TracksStore {
       .getTracks(this.isrcs)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ tracks, notFound }) => {
+        next: ({ tracks, notFound, source }) => {
           this._tracks.set(tracks);
+          this._source.set(source);
           this._notFound.set(notFound);
           this._state.set('ready');
         },
         error: () => {
           this._tracks.set([]);
           this._notFound.set([]);
+          this._source.set(null);
           this._state.set('error');
         },
       });

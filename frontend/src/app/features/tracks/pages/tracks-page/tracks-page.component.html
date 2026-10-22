@@ -49,6 +49,12 @@
 
   @case ('ready') {
     <div class="notices">
+      @if (store.source() === 'mock') {
+        <app-alert tone="info" heading="Modo demonstração: dados fictícios">
+          A integração com o Spotify aguarda a configuração da conta Premium. Os ISRCs são os do
+          contrato; títulos, artistas, capas e prévias são simulados pela API.
+        </app-alert>
+      }
       @if (store.hasNoPreviews()) {
         <app-alert tone="info" heading="Prévias de áudio indisponíveis">
           O Spotify deixou de enviar o link de prévia (<code>preview_url</code>) para apps novos.

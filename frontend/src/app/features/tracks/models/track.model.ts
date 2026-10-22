@@ -18,7 +18,11 @@ export interface Track {
 
 export type SortDirection = 'asc' | 'desc';
 
+/** De onde a API tirou os dados: Spotify real ou catálogo fictício (modo mock). */
+export type DataSource = 'spotify' | 'mock';
+
 export interface TracksResult {
   readonly tracks: readonly Track[];
   readonly notFound: readonly string[];
+  readonly source: DataSource;
 }

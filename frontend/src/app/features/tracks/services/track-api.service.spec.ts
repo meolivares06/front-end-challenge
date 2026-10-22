@@ -1,3 +1,4 @@
+import type { TracksResult } from '../models/track.model';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -28,6 +29,7 @@ describe('TrackApiService', () => {
     expect(result).toEqual({
       tracks: [buildTrack({ isrc: 'AAAAA0000001' })],
       notFound: ['AAAAA0000002'],
+      source: 'spotify',
     });
   });
 
@@ -40,5 +42,16 @@ describe('TrackApiService', () => {
       .flush({}, { status: 503, statusText: 'Unavailable' });
 
     expect(error).toBeInstanceOf(IntegrationUnavailableError);
+  });
+
+  it('identifica o modo mock pelo cabeçalho X-Data-Source', () => {
+    let result: TracksResult | undefined;
+    service.getTracks(['AAAAA0000001']).subscribe((r) => (result = r));
+
+    http
+      .expectOne('/api/tracks/AAAAA0000001')
+      .flush(buildTrack({ isrc: 'AAAAA0000001' }), { headers: { 'X-Data-Source': 'mock' } });
+
+    expect(result?.source).toBe('mock');
   });
 });
