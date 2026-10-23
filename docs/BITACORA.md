@@ -25,6 +25,7 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 19 | [Value Object Isrc](#19-value-object-isrc) | `40d4224` |
 | 20 | [Guia de arquitetura validada por agente às cegas](#20-guia-de-arquitetura-validada-por-agente-às-cegas) | `6b6c048` |
 | 21 | [Deploy na Vercel](#21-deploy-na-vercel) | `20993e4` `265ae8e` `5160899` |
+| 22 | [Avisos proporcionais à importância](#22-avisos-proporcionais-à-importância) | ver abaixo |
 
 ---
 
@@ -630,4 +631,28 @@ As falhas da rodada 2 viraram notas na guia: `noUncheckedIndexedAccess` nos test
 **Verificação no ar:** `/` devolve o `index.html` do Angular; `/api/tracks/:isrc` responde em JSON com `X-Data-Source: mock`; as capas SVG são servidas.
 
 **Lição.** "Funciona localmente" não cobria o modelo de execução da plataforma (função, e não processo com `listen`). Os dois erros apareceram só no deploy real, o que reforça o valor do ensaio feito antes da entrega.
+
+---
+
+## 22. Avisos proporcionais à importância
+
+**Contexto.** No modo demonstração, a página abria com duas caixas de aviso antes da primeira capa (três com o Spotify real). Todas tinham o mesmo peso visual, mas não a mesma importância.
+
+**Decisão: o peso visual segue a importância.**
+
+| Mensagem | Antes | Agora |
+|---|---|---|
+| Erro de integração | Caixa com "Tentar de novo" | **Igual**: é a única caixa, por isso se destaca |
+| Modo demonstração | Caixa | Chip **"● Demonstração"** ao lado do título; a explicação abre num balão |
+| ISRC não encontrado | Caixa com a lista de códigos | **Cartão fantasma** na própria grade (borda tracejada, ISRC na forma de leitura) + resumo "9 de 10 encontradas" |
+| Prévias indisponíveis (Spotify real) | Caixa | Chip **"Sem prévias"** no resumo; o botão de cada faixa já explica |
+
+**Novos componentes**
+
+- `@shared/components/info-chip`: genérico, com tons `warn` e `muted`. É um `button` com `aria-expanded`/`aria-controls` e um balão `role="note"`; fecha com Esc, com clique fora ou com um novo clique.
+- `features/tracks/components/track-not-found`: recebe o Value Object `Isrc`.
+
+**Verificação.** Três testes do chip (abrir; fechar com Esc e com clique fora; alternar). Os testes da página conferem que não há `app-alert` quando tudo vai bem, que aparecem 7 cartões fantasma e o resumo "3 de 10", e que o chip "Sem prévias" aparece. O E2E abre o chip, lê o balão, fecha com Esc e confere o cartão fantasma. O AXE (WCAG 2.1 AA) deu **0 violações** em desktop e mobile.
+
+**Resultado.** Com tudo funcionando, a primeira vista mostra título, chip, resumo e capas: **nenhuma caixa**.
 

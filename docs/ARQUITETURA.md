@@ -103,7 +103,10 @@ TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──
 
 - **Status de carregamento:** o store tem `status: LoadStatus` (`@shared/models/load-status`: `'idle' | 'loading' | 'ready' | 'error'`), nunca `loading: boolean` + `error` soltos. A página faz `@switch (store.status())`.
 - **Derivados no store, não na tela:** ordenação, filtros e contagens são `withComputed`, e a porta expõe **o derivado**: a página lê `store.artists()` já ordenado. A ordenação em si é uma função pura em `utils/`, com `Intl.Collator('pt-BR', { sensitivity: 'base', numeric: true })`.
-- **Erro e avisos na tela:** use `<app-alert>` de `@shared/components/alert`: `tone="danger"` para erro (vira `role="alert"`) e `tone="info"` para aviso (vira `role="status"`). Para tentar de novo: `actionLabel="Tentar de novo" (action)="retry()"`.
+- **Mensagens na tela: cada uma com o peso que merece.**
+  - **Erro que exige ação** → `<app-alert>` de `@shared/components/alert` (`role="alert"`), com `actionLabel="Tentar de novo" (action)="retry()"`. É a única caixa da página.
+  - **Contexto ou limitação** (modo demonstração, recurso indisponível) → `<app-info-chip>` de `@shared/components/info-chip`: rótulo curto sempre visível e explicação num balão sob demanda (`label`, `heading`, `tone="warn" | "muted"`, conteúdo projetado).
+  - **Ausência dentro de uma lista** (item não encontrado) → um cartão "fantasma" no próprio lugar da lista (ex.: `app-track-not-found`), mais o total no resumo ("9 de 10").
 - **Value Object ou string?** Use VO quando o valor tem **formato ou invariante a validar** (código ISRC, código ISO de país, e-mail, faixa de valores). Texto livre (nome, título) fica `string`. Molde de VO:
 
 ```ts

@@ -44,7 +44,12 @@ describe('TracksPageComponent (integração)', () => {
     expect(rendered).toEqual(['Água', 'Bloco', 'Zebra']);
     expect(el.textContent).toContain('03:35');
     expect(el.textContent).toContain('Indisponível no BR');
-    expect(el.textContent).toContain('7 ISRC não encontrado');
+    // ISRCs sem resultado viram cartões na própria grade, sem caixa de aviso.
+    expect(el.querySelectorAll('app-track-not-found').length).toBe(7);
+    expect(el.querySelector('.summary')?.textContent).toMatch(/3\s+de 10 encontradas/);
+    expect(el.querySelector('app-alert')).toBeNull();
+    // Sem preview_url em nenhuma faixa: a limitação vira chip no resumo, não caixa.
+    expect(el.querySelector('.toolbar app-info-chip button')?.textContent).toContain('Sem prévias');
   });
 
   it('alerta o usuário quando a integração está indisponível e permite tentar de novo', async () => {
@@ -70,10 +75,12 @@ describe('TracksPageComponent (integração)', () => {
     );
     await fixture.whenStable();
 
-    expect(el.textContent).toContain('Modo demonstração: dados fictícios');
-    // Aviso informativo não interrompe o leitor de tela: role=status, não alert.
+    // O modo demonstração vira um chip ao lado do título (detalhe sob demanda), não uma caixa.
+    const chip = el.querySelector('app-info-chip button');
+    expect(chip?.textContent).toContain('Demonstração');
+    expect(chip?.getAttribute('aria-expanded')).toBe('false');
+    expect(el.querySelector('app-alert')).toBeNull();
     expect(el.querySelector('[role="alert"]')).toBeNull();
-    expect(el.querySelectorAll('[role="status"]').length).toBeGreaterThan(0);
   });
 
   it('não mostra o aviso de demonstração com dados reais do Spotify', async () => {
@@ -82,6 +89,6 @@ describe('TracksPageComponent (integração)', () => {
     );
     await fixture.whenStable();
 
-    expect(el.textContent).not.toContain('Modo demonstração');
+    expect(el.textContent).not.toContain('Demonstração');
   });
 });

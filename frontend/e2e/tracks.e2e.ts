@@ -13,9 +13,24 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await tracks.waitForTracks();
   });
 
-  test('lista as faixas encontradas, avisa o modo demonstração e o ISRC não encontrado', async () => {
-    await expect(tracks.alert('Modo demonstração: dados fictícios')).toBeVisible();
-    await expect(tracks.alert('1 ISRC não encontrado')).toContainText('QZ-NJX-20-78148');
+  test('lista as faixas, sinaliza o modo demonstração e o ISRC não encontrado sem caixas de aviso', async ({
+    page,
+  }) => {
+    // Nada de caixas quando tudo vai bem: contexto em chip, ausência na própria grade.
+    await expect(page.locator('app-alert')).toHaveCount(0);
+
+    const demo = tracks.chip('Demonstração');
+    await expect(demo).toHaveAttribute('aria-expanded', 'false');
+    await demo.click();
+    await expect(page.getByRole('note', { name: 'Dados fictícios' })).toContainText(
+      'conta Premium',
+    );
+    await page.keyboard.press('Escape');
+    await expect(demo).toHaveAttribute('aria-expanded', 'false');
+
+    await expect(tracks.notFoundCards()).toHaveCount(1);
+    await expect(tracks.notFoundCards()).toContainText('QZ-NJX-20-78148');
+    await expect(page.locator('.summary')).toContainText('9 de 10 encontradas');
     await expect(tracks.cards).toHaveCount(9);
   });
 

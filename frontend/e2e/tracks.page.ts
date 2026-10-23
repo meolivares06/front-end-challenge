@@ -38,6 +38,14 @@ export class TracksPage {
     return this.cards.filter({ has: this.page.getByRole('heading', { name: title, exact: true }) });
   }
 
+  chip(label: string): Locator {
+    return this.page.getByRole('button', { name: new RegExp(label) });
+  }
+
+  notFoundCards(): Locator {
+    return this.page.locator('app-track-not-found');
+  }
+
   alert(heading: string): Locator {
     return this.alerts.filter({ hasText: heading });
   }

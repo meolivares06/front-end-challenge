@@ -1,18 +1,32 @@
 <header class="page-header">
   <div class="page-header__text">
-    <h1>Faixas do contrato</h1>
+    <div class="title-row">
+      <h1>Faixas do contrato</h1>
+      @if (store.source() === 'mock') {
+        <app-info-chip label="Demonstração" heading="Dados fictícios" tone="warn">
+          A integração com o Spotify aguarda a configuração da conta Premium. Os ISRCs são os do
+          contrato; títulos, artistas, capas e prévias são simulados pela API.
+        </app-info-chip>
+      }
+    </div>
     <p class="page-header__lead">
       {{ store.isrcs.length }} gravações informadas pelo produtor, consultadas por ISRC na Spotify
       Web API.
     </p>
   </div>
 
-  @if (store.status() === 'ready' && store.total()) {
+  @if (store.status() === 'ready' && (store.total() || store.notFound().length)) {
     <div class="toolbar">
       <p class="summary" aria-live="polite">
-        <strong>{{ store.total() }}</strong> faixas ·
+        <strong>{{ store.total() }}</strong> de {{ store.isrcs.length }} encontradas ·
         <strong>{{ store.availableInBrazil() }}</strong> disponíveis no BR
       </p>
+      @if (store.hasNoPreviews()) {
+        <app-info-chip label="Sem prévias" heading="Prévias de áudio indisponíveis">
+          O Spotify deixou de enviar o link de prévia (<code>preview_url</code>) para apps novos.
+          Use o link de cada faixa para ouvir no Spotify.
+        </app-info-chip>
+      }
       <button
         type="button"
         class="button button--ghost"
@@ -48,41 +62,17 @@
   }
 
   @case ('ready') {
-    <div class="notices">
-      @if (store.source() === 'mock') {
-        <app-alert tone="info" heading="Modo demonstração: dados fictícios">
-          A integração com o Spotify aguarda a configuração da conta Premium. Os ISRCs são os do
-          contrato; títulos, artistas, capas e prévias são simulados pela API.
-        </app-alert>
+    <ol class="grid" role="list">
+      @for (track of store.tracks(); track track.isrc; let i = $index) {
+        <li class="grid__item" [style.--i]="i" [style.view-transition-name]="'track-' + track.isrc">
+          <app-track-card [track]="track" />
+        </li>
       }
-      @if (store.hasNoPreviews()) {
-        <app-alert tone="info" heading="Prévias de áudio indisponíveis">
-          O Spotify deixou de enviar o link de prévia (<code>preview_url</code>) para apps novos.
-          Use o link de cada faixa para ouvir no Spotify.
-        </app-alert>
+      @for (isrc of store.notFound(); track isrc.value; let i = $index) {
+        <li class="grid__item" [style.--i]="store.total() + i">
+          <app-track-not-found [isrc]="isrc" />
+        </li>
       }
-      @if (store.notFound().length) {
-        <app-alert
-          tone="info"
-          heading="{{ store.notFound().length }} ISRC não encontrado no Spotify"
-        >
-          {{ notFoundLabel() }}
-        </app-alert>
-      }
-    </div>
-
-    @if (store.tracks().length) {
-      <ol class="grid" role="list">
-        @for (track of store.tracks(); track track.isrc; let i = $index) {
-          <li
-            class="grid__item"
-            [style.--i]="i"
-            [style.view-transition-name]="'track-' + track.isrc"
-          >
-            <app-track-card [track]="track" />
-          </li>
-        }
-      </ol>
-    }
+    </ol>
   }
 }
