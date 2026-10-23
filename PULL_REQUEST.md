@@ -2,10 +2,11 @@
 
 Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spotify Web API e exibe, em ordem alfabética por título: capa do álbum, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e disponibilidade no Brasil.
 
-**Demo:** https://isrc-spotify-challenge.vercel.app
+**Demo (dados reais do Spotify):** https://isrc-spotify-challenge.vercel.app
 
 - Alerta com "Tentar de novo" quando a integração está indisponível; se só parte das consultas falha, as demais faixas aparecem com um aviso.
 - ISRCs não encontrados aparecem como cartão na grade, e o resumo indica quantas faixas foram encontradas.
+- Prévia de áudio: com `preview_url`, player próprio; sem ela (caso atual de apps novos), o player do Spotify é revelado sobre o próprio card, a partir do botão tocado.
 - Responsiva, acessível (AXE sem violações) e com animações que respeitam `prefers-reduced-motion`.
 - Nenhum dado é armazenado.
 
@@ -27,7 +28,7 @@ O contexto e as alternativas de cada decisão estão em `docs/DECISOES.md`; a es
 
 ## Como testar
 
-Sem credenciais, a API sobe em modo de demonstração. Os passos estão no README.
+Sem credenciais, a API sobe em modo de demonstração, que cobre todos os estados da tela (não encontrada, indisponível no BR, com e sem prévia). Os passos estão no README.
 
 | Nível | Comando |
 |---|---|
