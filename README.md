@@ -38,7 +38,7 @@ Angular ──GET /api/tracks/:isrc──▶ API ──client credentials──�
 src/app/
 ├── features/tracks/          # tudo da funcionalidade "faixas" fica junto
 │   ├── components/           # track-card, audio-preview, track-skeleton
-│   ├── models/               # Track, SortDirection
+│   ├── models/               # Track, SortDirection, Value Object Isrc (validação ISO 3901)
 │   ├── pages/tracks-page/    # apresentação: lê o store e repassa ações
 │   ├── services/             # TrackApiService (só requisições HTTP), AudioPreviewService
 │   ├── ports/                # contratos: TRACKS_STORE e TRACKS_REPOSITORY (InjectionToken)

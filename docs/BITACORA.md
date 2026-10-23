@@ -22,6 +22,7 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `338516b` `3ef5b09` `678fc3c` |
 | 17 | [Testes E2E](#17-testes-e2e) | ver no histórico |
 | 18 | [NgRx Signal Store e inversão de dependência](#18-ngrx-signal-store-e-inversão-de-dependência) | `26170bb` `01efbb2` |
+| 19 | [Value Object Isrc](#19-value-object-isrc) | ver abaixo |
 
 ---
 
@@ -561,4 +562,27 @@ TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──
 - O teste de integração da página e os 18 E2E passaram **sem alteração**, o que mostra que o comportamento foi preservado.
 - O limite de cobertura apontou um ramo sem teste (voltar de Z–A para A–Z), e o caso foi incluído.
 - Bundle: de 55 para 59 kB transferidos (+4 kB do NgRx).
+
+---
+
+## 19. Value Object Isrc
+
+**Contexto.** Ao comparar com outro projeto (DDD com Value Objects), a recomendação foi trazer só o que se paga aqui. O ISRC é o identificador central do domínio, mas circulava como `string`: só o BFF validava o formato.
+
+**Decisão.** `models/isrc.value-object.ts`, em TypeScript puro (o lint já proíbe Angular em `models/`):
+
+| Característica | Como |
+|---|---|
+| Sempre válido | Construtor privado; só nasce por `Isrc.create()` |
+| Normalização | Remove hífens e espaços e põe em maiúsculas: `br-1sp-12-00071` vira `BR1SP1200071` |
+| Validação (ISO 3901) | País (2 letras) + registrante (3) + ano (2 dígitos) + designação (5 dígitos); senão, `InvalidIsrcError` |
+| Imutável | `Object.freeze` |
+| Igualdade por valor | `equals()` |
+| Comportamento | `country`, `registrant`, `year`, `designation` e `format()`: `BR-1SP-12-00071`, a forma de leitura do manual ISRC |
+
+**Onde o tipo passou a circular.** `CONTRACT_ISRCS` (validado **ao carregar o módulo**: um código errado falha cedo, não numa requisição), as portas `TRACKS_STORE` e `TRACKS_REPOSITORY`, o store e o `TrackApiService`. O card e o aviso de não encontrados mostram a forma de leitura.
+
+**O que ficou de fora, de propósito.** O `Track` continua com `isrc: string`: é o contrato JSON do BFF, e convertê-lo em entidade só traria mapeamento sem regra nova. Entidades e agregados não se justificam numa tela de leitura.
+
+**Verificação.** 10 testes do VO (normalização, partes, 6 formatos inválidos, igualdade, imutabilidade); 34 testes unitários no total; o E2E confere a forma de leitura no card (`BX-KZM-19-00338`) e no aviso (`QZ-NJX-20-78148`).
 
