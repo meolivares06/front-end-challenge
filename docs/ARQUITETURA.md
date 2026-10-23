@@ -416,6 +416,7 @@ export function buildArtist(overrides: Partial<Artist> = {}): Artist {
 | `src/tracks/` | Regra de disponibilidade no BR (função pura), mapeamento e rotas HTTP |
 | `src/mock/` | Cliente simulado com o **mesmo contrato** do real + capas e prévias geradas |
 | `src/create-app.js` | Monta o Express (testável sem abrir porta); serve o build em produção |
-| `src/server.js` | Composição: escolhe entre real e mock (`SPOTIFY_MODE`) |
+| `src/compose.js` | Composição: escolhe entre real e mock (`SPOTIFY_MODE`) |
+| `src/server.js` / `src/index.js` | Entradas: `npm start` (local) / Vercel (exporta a app; a Vercel exige que importe o `express`) |
 
 Um cenário novo do mock entra no catálogo (`src/mock/mock-catalog.js`), nunca como `if (mock)` no código.
