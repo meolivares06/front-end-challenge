@@ -1,6 +1,7 @@
 import { InjectionToken, type Signal } from '@angular/core';
 import type { Isrc } from '../models/isrc.value-object';
-import type { DataSource, LoadStatus, SortDirection, Track } from '../models/track.model';
+import type { LoadStatus } from '@shared/models/load-status';
+import type { DataSource, SortDirection, Track } from '../models/track.model';
 
 /**
  * Porta de entrada: o que a camada de apresentação pode ler e pedir.

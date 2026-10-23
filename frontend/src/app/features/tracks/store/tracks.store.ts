@@ -11,7 +11,8 @@ import {
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import type { Isrc } from '../models/isrc.value-object';
-import type { DataSource, LoadStatus, SortDirection, Track } from '../models/track.model';
+import type { LoadStatus } from '@shared/models/load-status';
+import type { DataSource, SortDirection, Track } from '../models/track.model';
 import { TRACKS_REPOSITORY } from '../ports/tracks-repository.port';
 import { CONTRACT_ISRCS } from '../utils/contract-isrcs';
 import { sortTracksByTitle } from '../utils/sort-tracks';

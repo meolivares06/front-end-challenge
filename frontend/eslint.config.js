@@ -22,12 +22,12 @@ const RULES = {
   // DIP: quem consome o store injeta a porta (ports/tracks-store.port), nunca a implementação.
   noStoreImpl: rule(
     String.raw`/store/`,
-    'Injete a porta TRACKS_STORE (ports/); a implementação só é ligada em <feature>.providers.ts.',
+    'Injete a porta do store (ports/); a implementação só é ligada em <feature>.providers.ts.',
   ),
   // DIP: o store depende da porta de dados (ports/), nunca do serviço HTTP concreto.
   noApiImpl: rule(
     String.raw`(^|/)[\w-]+-api\.service$|^@angular/common/http$`,
-    'O store depende da porta TRACKS_REPOSITORY (ports/), não do serviço HTTP.',
+    'O store depende da porta de dados (ports/), não do serviço HTTP.',
   ),
   noPresentation: rule(
     String.raw`/(components|pages)/`,
@@ -101,5 +101,9 @@ module.exports = defineConfig([
   boundary([feature('services')], RULES.noState, RULES.noPresentation, RULES.useAlias),
   boundary([feature('models'), feature('utils')], RULES.pure, RULES.noPresentation, RULES.useAlias),
   boundary(['src/app/shared/**/*.ts'], RULES.noFeatures),
-  boundary(['src/app/shared/utils/**/*.ts'], RULES.noFeatures, RULES.pure),
+  boundary(
+    ['src/app/shared/utils/**/*.ts', 'src/app/shared/models/**/*.ts'],
+    RULES.noFeatures,
+    RULES.pure,
+  ),
 ]);

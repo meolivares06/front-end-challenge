@@ -20,9 +20,6 @@ export interface Track {
 
 export type SortDirection = 'asc' | 'desc';
 
-/** Ciclo de vida do carregamento das faixas. */
-export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
-
 /** De onde a API tirou os dados: Spotify real ou catálogo fictício (modo mock). */
 export type DataSource = 'spotify' | 'mock';
 
