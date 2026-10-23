@@ -4,6 +4,7 @@ import {
   patchState,
   signalStore,
   withComputed,
+  withHooks,
   withMethods,
   withProps,
   withState,
@@ -76,4 +77,7 @@ export const TracksSignalStore = signalStore(
       patchState(store, { direction });
     },
   })),
+  // O store carrega ao nascer: como é provido na página, nasce e morre com a tela.
+  // A página fica só com apresentação, sem decidir quando buscar dados.
+  withHooks({ onInit: (store) => store.load() }),
 );

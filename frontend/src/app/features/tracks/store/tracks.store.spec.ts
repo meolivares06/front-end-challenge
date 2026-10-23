@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { buildTrack } from '@testing/track.fixture';
-import { type Observable, of, Subject, throwError } from 'rxjs';
+import { NEVER, type Observable, of, Subject, throwError } from 'rxjs';
 import { Isrc } from '../models/isrc.value-object';
 import type { TracksResult } from '../models/track.model';
 import { TRACKS_REPOSITORY } from '../ports/tracks-repository.port';
@@ -13,12 +13,19 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
   let store: TracksStorePort;
 
   beforeEach(() => {
-    getTracks = vi.fn();
+    // O store carrega ao nascer; NEVER deixa essa primeira carga pendente até cada teste definir a resposta.
+    getTracks = vi.fn(() => NEVER);
     TestBed.configureTestingModule({
       // A mesma composição da app; só a porta de dados é trocada por um dublê.
       providers: [provideTracksFeature(), { provide: TRACKS_REPOSITORY, useValue: { getTracks } }],
     });
     store = TestBed.inject(TRACKS_STORE);
+  });
+
+  it('carrega sozinho ao ser criado, com os ISRCs do contrato', () => {
+    expect(getTracks).toHaveBeenCalledTimes(1);
+    expect(getTracks).toHaveBeenCalledWith(store.isrcs);
+    expect(store.status()).toBe('loading');
   });
 
   it('expõe as faixas ordenadas e os contadores após carregar', () => {
