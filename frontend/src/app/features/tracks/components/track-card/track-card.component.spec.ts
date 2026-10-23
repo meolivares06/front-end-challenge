@@ -33,6 +33,9 @@ describe('TrackCardComponent (áudio)', () => {
     );
     expect(iframe?.getAttribute('title')).toBe('Player do Spotify: Louca');
     expect(button.getAttribute('aria-pressed')).toBe('true');
+    // Aberto não é "tocando": o botão vira fechar; o play é o do próprio player do Spotify.
+    expect(button.getAttribute('aria-label')).toBe('Fechar o player do Spotify de "Louca"');
+    expect(iframe?.getAttribute('height')).toBe('152');
 
     button.click();
     await fixture.whenStable();

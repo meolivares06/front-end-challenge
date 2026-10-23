@@ -9,7 +9,7 @@
   (click)="toggle()"
 >
   <app-icon
-    [name]="mode() === 'none' ? 'mute' : isPlaying() || isEmbedOpen() ? 'pause' : 'play'"
+    [name]="mode() === 'none' ? 'mute' : isEmbedOpen() ? 'close' : isPlaying() ? 'pause' : 'play'"
     [size]="mode() === 'none' ? 18 : 22"
   />
 </button>

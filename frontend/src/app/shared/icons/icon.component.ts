@@ -1,7 +1,16 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type IconName =
-  'play' | 'pause' | 'external' | 'sort' | 'refresh' | 'alert' | 'mute' | 'info' | 'search';
+  | 'play'
+  | 'pause'
+  | 'external'
+  | 'sort'
+  | 'refresh'
+  | 'alert'
+  | 'mute'
+  | 'info'
+  | 'search'
+  | 'close';
 
 const PATHS: Record<IconName, string> = {
   play: 'M8 5.14v13.72a1 1 0 0 0 1.52.85l10.8-6.86a1 1 0 0 0 0-1.7L9.52 4.3A1 1 0 0 0 8 5.14Z',
@@ -14,6 +23,7 @@ const PATHS: Record<IconName, string> = {
   mute: 'M11 5 6 9H3v6h3l5 4V5ZM22 9l-6 6M16 9l6 6',
   info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16v-4.5M12 8h.01',
   search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM20 20l-4-4',
+  close: 'M6 6l12 12M18 6 6 18',
 };
 
 const FILLED: ReadonlySet<IconName> = new Set(['play', 'pause']);
