@@ -91,5 +91,5 @@ SPOTIFY_CLIENT_SECRET=...
 
 **Limites atuais da API do Spotify** (detalhes em [DECISOES.md](docs/DECISOES.md#1-limitações-da-spotify-web-api)):
 - a lista de países disponíveis foi removida, então a disponibilidade no BR vem de `market=BR` + `is_playable`;
-- o link da prévia de áudio (`preview_url`) vem vazio para apps novas, e a página explica isso;
+- o link da prévia de áudio (`preview_url`) vem vazio para apps novas; nesse caso, o botão da faixa abre o player incorporado do Spotify;
 - não há busca em lote, então é uma busca por ISRC, em paralelo.

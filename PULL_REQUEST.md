@@ -22,7 +22,7 @@ O contexto e as alternativas de cada decisão estão em `docs/DECISOES.md`; a es
 ## Limitações atuais da API do Spotify
 
 - `available_markets` foi removido em Development Mode → disponibilidade no BR via `market=BR` + `is_playable`.
-- `preview_url` vem `null` para apps novos → o player funciona quando há URL; sem ela, o botão fica desabilitado e explicado.
+- `preview_url` vem `null` para apps novos → quando há URL, toca a prévia no player próprio; sem ela, o botão abre o player incorporado do Spotify (pelo ID da faixa).
 - Sem endpoint em lote → uma busca por ISRC, em paralelo.
 
 ## Como testar

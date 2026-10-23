@@ -27,7 +27,7 @@ Antes da implementação, a documentação atual da Spotify Web API foi conferid
 | Limitação | Fonte | Decisão |
 |---|---|---|
 | `available_markets` removido em *Development Mode* (fev/2026) | [Guia de migração](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide) | Disponibilidade no BR via busca com `market=BR` + `is_playable`; se a faixa não aparecer no BR, busca sem mercado para distinguir "indisponível" de "não encontrada" |
-| `preview_url` nulo para apps criados após nov/2024 | Comunicado do Spotify | O player funciona quando há URL; sem ela, o botão fica desabilitado e explicado |
+| `preview_url` nulo para apps criados após nov/2024 | Comunicado do Spotify | Com URL, player próprio; sem ela, o player incorporado do Spotify (seção 4) |
 | Endpoint em lote `GET /tracks` removido em *Development Mode* | Guia de migração | Uma busca por ISRC, em paralelo |
 | *Development Mode* exige Premium na conta dona do app | Guia de migração | Modo de demonstração quando não há credenciais (seção 10) |
 | O fluxo *Client Credentials* usa o Client Secret | Documentação de autorização | O segredo fica num servidor intermediário, nunca no navegador (seção 3) |
@@ -40,7 +40,7 @@ Antes da implementação, a documentação atual da Spotify Web API foi conferid
 - **Angular 21**: a versão LTS vigente (suporte até 2027-06, [cronograma oficial](https://angular.dev/reference/releases)). A 22 está em suporte ativo, não em LTS.
 - **Standalone, signals e zoneless**, os padrões atuais do framework.
 - **SCSS próprio, sem biblioteca de componentes:** visual autoral e bundle de ~59 kB transferidos.
-- **Fontes empacotadas** (`@fontsource`): o build não depende de rede e a página não chama serviços de terceiros.
+- **Fontes empacotadas** (`@fontsource`): o build não depende de rede e a página não carrega fontes de terceiros.
 - **`.npmrc` com `legacy-peer-deps=true`:** contorna um defeito do npm 10.9 na resolução de dependências do Vitest 4.
 - **Git:** commits atômicos em [Conventional Commits](https://www.conventionalcommits.org/).
 
@@ -86,9 +86,15 @@ A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o servi
 | Ordem alfabética por título | `Intl.Collator('pt-BR')`: ignora acentos e caixa |
 | Data de lançamento | Respeita a precisão informada pelo Spotify (ano, mês ou dia) |
 | Duração `mm:ss` | `DurationPipe` em `shared/pipes` |
-| Prévia de áudio | Um único `<audio>` para a página: tocar uma prévia pausa a anterior |
+| Prévia de áudio | Com `preview_url`, um único `<audio>` para a página. Sem ela, o botão abre o player incorporado do Spotify da faixa (`open.spotify.com/embed/track/{id}`). Só um player fica ativo: abrir um fecha o outro |
 | Disponibilidade no BR | Selo por faixa |
 | Alerta se a integração cair | Caixa com "Tentar de novo" |
+
+**Player incorporado do Spotify para faixas sem prévia.** O Spotify não envia `preview_url` para apps novos (na captura, nenhuma das 10 faixas tem). O player incorporado usa só o ID da faixa, então o requisito de ouvir a prévia vale para todas. Custos aceitos:
+
+- O iframe é de terceiros (scripts e cookies do Spotify). Por isso só é carregado quando a pessoa pede, um por vez, e nunca na carga inicial da página.
+- A aparência do iframe não é controlável, e os testes só verificam o endereço, não o conteúdo.
+- A URL só é montada a partir de um ID com o formato do Spotify (22 caracteres base62), validado por uma função pura antes de ser marcada como confiável no iframe.
 
 **Peso visual proporcional à importância de cada mensagem.**
 
@@ -97,7 +103,7 @@ A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o servi
 | Integração indisponível (todas as consultas falharam) | Caixa de erro (`role="alert"`), com ação de repetir |
 | Integração instável (parte das consultas falhou) | Caixa de aviso (`role="status"`) acima da grade, com ação de repetir a lista inteira; cada ISRC sem resposta vira cartão "Não foi possível consultar" |
 | Modo de demonstração | Chip ao lado do título; a explicação abre sob demanda |
-| Prévias indisponíveis | Chip no resumo; o botão de cada faixa explica o motivo |
+| Prévias indisponíveis | Chip no resumo explicando a limitação; o botão de cada faixa oferece o player do Spotify |
 | ISRC não encontrado | Cartão na própria grade, com o ISRC na forma de leitura; o resumo mostra "9 de 10" |
 
 **Movimento**, sempre desligado com `prefers-reduced-motion`:

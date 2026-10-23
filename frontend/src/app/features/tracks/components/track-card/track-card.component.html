@@ -5,8 +5,16 @@
   } @else {
     <div class="card__art-fallback" aria-hidden="true">{{ t.title.charAt(0) }}</div>
   }
-  <app-audio-preview [isrc]="t.isrc" [title]="t.title" [previewUrl]="t.previewUrl" />
+  <app-audio-preview
+    [isrc]="t.isrc"
+    [title]="t.title"
+    [previewUrl]="t.previewUrl"
+    [embedUrl]="embedUrl()"
+  />
 </div>
+@if (isEmbedOpen() && embedUrl(); as url) {
+  <app-spotify-embed class="card__embed" [url]="url" [title]="t.title" />
+}
 
 <div class="card__body">
   <h2 class="card__title" [title]="t.title">{{ t.title }}</h2>

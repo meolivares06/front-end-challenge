@@ -83,10 +83,17 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await expect(card.getByRole('progressbar')).toHaveCount(0);
   });
 
-  test('desabilita a prévia quando a faixa não tem áudio', async () => {
-    const button = tracks.card('Louca').getByRole('button', { name: /não fornecida/ });
+  test('sem prévia, abre o player do Spotify da faixa', async () => {
+    const card = tracks.card('Louca');
+    await card.getByRole('button', { name: 'Ouvir "Louca" no player do Spotify' }).click();
 
-    await expect(button).toBeDisabled();
+    // Só o endereço é verificado: o conteúdo do iframe é do Spotify.
+    await expect(card.locator('iframe')).toHaveAttribute(
+      'src',
+      'https://open.spotify.com/embed/track/5w4O21KEy5RBVCiecgmSMo?theme=0',
+    );
+    await card.getByRole('button', { name: /Fechar o player do Spotify/ }).click();
+    await expect(card.locator('iframe')).toHaveCount(0);
   });
 
   test('não tem violações de acessibilidade (WCAG 2.1 AA)', async ({ page }) => {

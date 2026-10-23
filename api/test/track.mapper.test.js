@@ -9,6 +9,10 @@ describe('toTrackDto', () => {
     expect(dto).toMatchObject({ albumImageUrl: 'https://i.scdn.co/640', thumbnailUrl: 'https://i.scdn.co/300' });
   });
 
+  it('expõe o ID da faixa, usado pelo player incorporado do Spotify', () => {
+    expect(toTrackDto('BR1SP1200071', spotifyTrack, true).spotifyId).toBe('4s71Bub5KzXBSMyE8nlH4E');
+  });
+
   it('cai para a única imagem disponível', () => {
     const track = { ...spotifyTrack, album: { ...spotifyTrack.album, images: [{ url: 'https://i.scdn.co/only' }] } };
 
@@ -16,9 +20,10 @@ describe('toTrackDto', () => {
   });
 
   it('tolera faixa sem álbum, prévia ou link', () => {
-    const { album, preview_url, external_urls, ...bare } = spotifyTrack;
+    const { id, album, preview_url, external_urls, ...bare } = spotifyTrack;
 
     expect(toTrackDto('X', bare, false)).toMatchObject({
+      spotifyId: null,
       albumName: '',
       albumImageUrl: null,
       thumbnailUrl: null,

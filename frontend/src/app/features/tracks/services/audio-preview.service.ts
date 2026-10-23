@@ -1,8 +1,8 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 
 /**
- * Um único <audio> para a página inteira: tocar uma prévia pausa a anterior,
- * como em qualquer app de música.
+ * Um único player ativo na página: o <audio> das prévias ou o player incorporado do Spotify
+ * (para faixas sem `preview_url`). Abrir um fecha o outro, como em qualquer app de música.
  */
 @Injectable({ providedIn: 'root' })
 export class AudioPreviewService {
@@ -10,6 +10,8 @@ export class AudioPreviewService {
 
   readonly currentIsrc = signal<string | null>(null);
   readonly progress = signal(0);
+  /** Faixa com o player incorporado do Spotify aberto. */
+  readonly embedIsrc = signal<string | null>(null);
 
   constructor() {
     if (!this.audio) return;
@@ -25,6 +27,7 @@ export class AudioPreviewService {
 
   toggle(isrc: string, url: string): void {
     if (!this.audio) return;
+    this.embedIsrc.set(null);
     if (this.currentIsrc() === isrc) {
       this.audio.pause();
       this.reset();
@@ -34,6 +37,17 @@ export class AudioPreviewService {
     this.progress.set(0);
     this.currentIsrc.set(isrc);
     this.audio.play().catch(() => this.reset());
+  }
+
+  /** Abre o player incorporado desta faixa (pausando a prévia) ou o fecha, se já estiver aberto. */
+  toggleEmbed(isrc: string): void {
+    if (this.embedIsrc() === isrc) {
+      this.embedIsrc.set(null);
+      return;
+    }
+    this.audio?.pause();
+    this.reset();
+    this.embedIsrc.set(isrc);
   }
 
   private reset(): void {

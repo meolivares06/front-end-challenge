@@ -5,6 +5,8 @@ export type ReleaseDatePrecision = 'year' | 'month' | 'day';
 /** Contrato devolvido pela API (BFF) para cada ISRC. */
 export interface Track {
   readonly isrc: string;
+  /** ID da faixa no Spotify; permite o player incorporado quando não há `previewUrl`. */
+  readonly spotifyId: string | null;
   readonly title: string;
   readonly artists: readonly string[];
   readonly albumName: string;

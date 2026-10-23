@@ -3,6 +3,7 @@ export function toTrackDto(isrc, track, availableInBrazil) {
   const images = track.album?.images ?? [];
   return {
     isrc,
+    spotifyId: track.id ?? null,
     title: track.name,
     artists: track.artists.map((artist) => artist.name),
     albumName: track.album?.name ?? '',

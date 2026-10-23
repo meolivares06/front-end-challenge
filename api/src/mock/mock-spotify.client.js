@@ -10,6 +10,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function toSpotifyTrack(entry, market, assetsBaseUrl) {
   const cover = `${assetsBaseUrl}/covers/${entry.isrc}.svg`;
   return {
+    id: entry.spotifyId,
     name: entry.title,
     artists: entry.artists.map((name) => ({ name })),
     album: {

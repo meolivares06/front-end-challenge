@@ -1,15 +1,16 @@
 <button
   type="button"
   class="preview"
-  [disabled]="!previewUrl()"
+  [class.preview--embed]="mode() === 'embed'"
+  [disabled]="mode() === 'none'"
   [attr.aria-label]="label()"
-  [attr.aria-pressed]="previewUrl() ? isPlaying() : null"
+  [attr.aria-pressed]="pressed()"
   [title]="label()"
   (click)="toggle()"
 >
   <app-icon
-    [name]="!previewUrl() ? 'mute' : isPlaying() ? 'pause' : 'play'"
-    [size]="previewUrl() ? 22 : 18"
+    [name]="mode() === 'none' ? 'mute' : isPlaying() || isEmbedOpen() ? 'pause' : 'play'"
+    [size]="mode() === 'none' ? 18 : 22"
   />
 </button>
 @if (isPlaying()) {
