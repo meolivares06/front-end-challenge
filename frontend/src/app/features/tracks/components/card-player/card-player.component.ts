@@ -33,6 +33,7 @@ const NARROW = '(max-width: 639px)';
     '[class.is-closing]': 'phase() === "closing"',
     '[style.--origin-x.px]': 'origin().x',
     '[style.--origin-y.px]': 'origin().y',
+    '[style.--radius.px]': 'origin().radius',
     '(animationend)': 'onAnimationEnd($event)',
     '(keydown.escape)': 'close()',
   },
@@ -41,8 +42,11 @@ export class CardPlayerComponent {
   readonly url = input.required<string>();
   readonly title = input.required<string>();
   readonly coverUrl = input<string | null>(null);
-  /** Centro do botão que abriu o player, relativo ao card: origem do círculo. */
-  readonly origin = input<{ x: number; y: number }>({ x: 0, y: 0 });
+  /**
+   * Centro do botão que abriu o player, relativo ao card, e o raio até o canto mais distante:
+   * o círculo termina exatamente ao cobrir o card, então toda a animação fica visível.
+   */
+  readonly origin = input<{ x: number; y: number; radius: number }>({ x: 0, y: 0, radius: 0 });
   /** Emitido quando a animação de saída termina; quem usa fecha o player. */
   readonly closed = output<void>();
 

@@ -19,7 +19,17 @@
     [coverUrl]="t.albumImageUrl ?? t.thumbnailUrl"
     [origin]="playerOrigin()"
     (closed)="onPlayerClosed()"
-  />
+  >
+    <span
+      class="badge"
+      [class.badge--ok]="t.availableInBrazil"
+      [class.badge--off]="!t.availableInBrazil"
+    >
+      <span class="badge__dot" aria-hidden="true"></span>
+      {{ t.availableInBrazil ? 'Disponível no BR' : 'Indisponível no BR' }}
+    </span>
+    <span class="card__isrc">{{ isrcLabel() }}</span>
+  </app-card-player>
 }
 
 <div class="card__body">

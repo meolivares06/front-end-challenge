@@ -27,7 +27,7 @@ import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
     iframe {
       display: block;
       border: 0;
-      animation: embed-in 200ms var(--ease-out) both;
+      animation: embed-in 250ms var(--ease-out) both;
       border-radius: var(--radius-md);
     }
 

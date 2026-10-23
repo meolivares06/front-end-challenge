@@ -45,13 +45,16 @@ export class TrackCardComponent {
 
   /** Centro do botão de áudio, relativo ao card: de onde nasce o círculo do player. */
   protected readonly playerOrigin = computed(() => {
-    if (!this.isEmbedOpen()) return { x: 0, y: 0 };
+    if (!this.isEmbedOpen()) return { x: 0, y: 0, radius: 0 };
     const card = this.host.nativeElement;
-    const button = card.querySelector('button.preview');
-    if (!button) return { x: card.clientWidth / 2, y: card.clientHeight / 2 };
-    const a = card.getBoundingClientRect();
-    const b = button.getBoundingClientRect();
-    return { x: b.left - a.left + b.width / 2, y: b.top - a.top + b.height / 2 };
+    const { width, height } = card.getBoundingClientRect();
+    const button = card.querySelector('button.preview')?.getBoundingClientRect();
+    const box = card.getBoundingClientRect();
+    const x = button ? button.left - box.left + button.width / 2 : width / 2;
+    const y = button ? button.top - box.top + button.height / 2 : height / 2;
+    // Distância até o canto mais distante: o círculo cobre o card exatamente no fim.
+    const radius = Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+    return { x, y, radius };
   });
 
   /** Fim da animação de saída: fecha o player e devolve o foco ao botão da faixa. */
