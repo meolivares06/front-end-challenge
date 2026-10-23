@@ -62,6 +62,27 @@ describe('TrackCardComponent (áudio)', () => {
     expect(button.getAttribute('aria-pressed')).toBe('false');
   });
 
+  it('abre e fecha mesmo se a animação não terminar (aba em segundo plano)', async () => {
+    const { fixture, el, button } = await render(buildTrack({ previewUrl: null }));
+    vi.useFakeTimers();
+    try {
+      button.click();
+      fixture.detectChanges();
+
+      vi.advanceTimersByTime(800);
+      fixture.detectChanges();
+      expect(el.querySelector('iframe')).not.toBeNull();
+
+      el.querySelector<HTMLButtonElement>('app-card-player button')?.click();
+      fixture.detectChanges();
+      vi.advanceTimersByTime(500);
+      fixture.detectChanges();
+      expect(el.querySelector('app-card-player')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('fecha o player com Esc', async () => {
     const { fixture, el, button } = await render(buildTrack({ previewUrl: null }));
     button.click();

@@ -2,7 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   type ElementRef,
+  inject,
   input,
   output,
   signal,
@@ -15,6 +17,12 @@ type Phase = 'opening' | 'open' | 'closing';
 
 /** Abaixo desta largura o card é horizontal e baixo: cabe o player compacto do Spotify. */
 const NARROW = '(max-width: 639px)';
+/**
+ * Se `animationend` não chegar (aba em segundo plano, navegador que pula animações),
+ * a fase avança mesmo assim. Um pouco acima da duração das animações no CSS.
+ */
+const OPEN_FALLBACK_MS = 800;
+const CLOSE_FALLBACK_MS = 500;
 
 /**
  * Face "tocando" do card: a capa desfocada cobre o card num círculo que nasce no botão
@@ -60,19 +68,39 @@ export class CardPlayerComponent {
   });
 
   private readonly closeButton = viewChild.required<ElementRef<HTMLButtonElement>>('closeButton');
+  private fallback: ReturnType<typeof setTimeout> | undefined = setTimeout(
+    () => this.finishOpening(),
+    OPEN_FALLBACK_MS,
+  );
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.fallback));
+  }
 
   close(): void {
-    if (this.phase() !== 'closing') this.phase.set('closing');
+    if (this.phase() === 'closing') return;
+    this.phase.set('closing');
+    clearTimeout(this.fallback);
+    this.fallback = setTimeout(() => this.finishClosing(), CLOSE_FALLBACK_MS);
   }
 
   protected onAnimationEnd(event: AnimationEvent): void {
     // Só a revelação do próprio host importa (o fade do iframe também borbulha até aqui).
     if (event.target !== event.currentTarget) return;
-    if (this.phase() === 'opening') {
-      this.phase.set('open');
-      this.closeButton().nativeElement.focus();
-    } else if (this.phase() === 'closing') {
-      this.closed.emit();
-    }
+    if (this.phase() === 'opening') this.finishOpening();
+    else if (this.phase() === 'closing') this.finishClosing();
+  }
+
+  private finishOpening(): void {
+    if (this.phase() !== 'opening') return;
+    clearTimeout(this.fallback);
+    this.phase.set('open');
+    this.closeButton().nativeElement.focus();
+  }
+
+  private finishClosing(): void {
+    clearTimeout(this.fallback);
+    this.fallback = undefined;
+    this.closed.emit();
   }
 }
