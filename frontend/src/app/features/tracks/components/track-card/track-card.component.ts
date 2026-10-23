@@ -1,5 +1,12 @@
 import { NgOptimizedImage } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input,
+} from '@angular/core';
 import { IconComponent } from '@shared/icons/icon.component';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
 import { Isrc } from '../../models/isrc.value-object';
@@ -8,16 +15,16 @@ import { formatReleaseDate } from '../../utils/format-release-date';
 import { AudioPreviewService } from '../../services/audio-preview.service';
 import { spotifyEmbedUrl } from '../../utils/spotify-embed-url';
 import { AudioPreviewComponent } from '../audio-preview/audio-preview.component';
-import { SpotifyEmbedComponent } from '../spotify-embed/spotify-embed.component';
+import { CardPlayerComponent } from '../card-player/card-player.component';
 
 @Component({
   selector: 'app-track-card',
   imports: [
     AudioPreviewComponent,
+    CardPlayerComponent,
     DurationPipe,
     IconComponent,
     NgOptimizedImage,
-    SpotifyEmbedComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './track-card.component.html',
@@ -26,6 +33,7 @@ import { SpotifyEmbedComponent } from '../spotify-embed/spotify-embed.component'
 })
 export class TrackCardComponent {
   private readonly player = inject(AudioPreviewService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly track = input.required<Track>();
 
@@ -34,6 +42,23 @@ export class TrackCardComponent {
     this.track().previewUrl ? null : spotifyEmbedUrl(this.track().spotifyId),
   );
   protected readonly isEmbedOpen = computed(() => this.player.embedIsrc() === this.track().isrc);
+
+  /** Centro do botão de áudio, relativo ao card: de onde nasce o círculo do player. */
+  protected readonly playerOrigin = computed(() => {
+    if (!this.isEmbedOpen()) return { x: 0, y: 0 };
+    const card = this.host.nativeElement;
+    const button = card.querySelector('button.preview');
+    if (!button) return { x: card.clientWidth / 2, y: card.clientHeight / 2 };
+    const a = card.getBoundingClientRect();
+    const b = button.getBoundingClientRect();
+    return { x: b.left - a.left + b.width / 2, y: b.top - a.top + b.height / 2 };
+  });
+
+  /** Fim da animação de saída: fecha o player e devolve o foco ao botão da faixa. */
+  protected onPlayerClosed(): void {
+    this.player.toggleEmbed(this.track().isrc);
+    this.host.nativeElement.querySelector<HTMLButtonElement>('button.preview')?.focus();
+  }
 
   protected readonly releaseDate = computed(() =>
     formatReleaseDate(this.track().releaseDate, this.track().releaseDatePrecision),

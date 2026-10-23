@@ -18,28 +18,63 @@ describe('TrackCardComponent (áudio)', () => {
     return { fixture, el, button: el.querySelector('button.preview') as HTMLButtonElement };
   };
 
-  it('sem prévia, abre e fecha o player do Spotify da faixa', async () => {
+  /** A revelação é uma animação CSS; no teste, o fim dela é sinalizado à mão. */
+  const finishAnimation = async (fixture: { whenStable(): Promise<unknown> }, el: HTMLElement) => {
+    el.querySelector('app-card-player')?.dispatchEvent(
+      new Event('animationend', { bubbles: true }),
+    );
+    await fixture.whenStable();
+  };
+
+  it('sem prévia, revela o player do Spotify sobre o card e o fecha com animação', async () => {
     const { fixture, el, button } = await render(buildTrack({ title: 'Louca', previewUrl: null }));
 
     expect(button.disabled).toBe(false);
     expect(button.getAttribute('aria-label')).toBe('Ouvir "Louca" no player do Spotify');
-    expect(el.querySelector('iframe')).toBeNull();
+    expect(el.querySelector('app-card-player')).toBeNull();
 
     button.click();
     await fixture.whenStable();
+    const region = el.querySelector('app-card-player');
+    expect(region?.getAttribute('role')).toBe('region');
+    expect(region?.getAttribute('aria-label')).toBe('Player do Spotify: Louca');
+    expect(button.getAttribute('aria-pressed')).toBe('true');
+    // O iframe só entra quando a revelação termina: nunca dentro de uma animação.
+    expect(el.querySelector('iframe')).toBeNull();
+
+    await finishAnimation(fixture, el);
     const iframe = el.querySelector('iframe');
     expect(iframe?.getAttribute('src')).toBe(
       'https://open.spotify.com/embed/track/4s71Bub5KzXBSMyE8nlH4E?theme=0',
     );
     expect(iframe?.getAttribute('title')).toBe('Player do Spotify: Louca');
-    expect(button.getAttribute('aria-pressed')).toBe('true');
-    // Aberto não é "tocando": o botão vira fechar; o play é o do próprio player do Spotify.
-    expect(button.getAttribute('aria-label')).toBe('Fechar o player do Spotify de "Louca"');
-    expect(iframe?.getAttribute('height')).toBe('152');
+    const close = el.querySelector<HTMLButtonElement>('app-card-player button');
+    expect(document.activeElement).toBe(close);
 
+    close?.click();
+    await fixture.whenStable();
+    expect(region?.classList).toContain('is-closing');
+    expect(el.querySelector('iframe')).toBeNull();
+
+    await finishAnimation(fixture, el);
+    expect(el.querySelector('app-card-player')).toBeNull();
+    expect(document.activeElement).toBe(button);
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('fecha o player com Esc', async () => {
+    const { fixture, el, button } = await render(buildTrack({ previewUrl: null }));
     button.click();
     await fixture.whenStable();
-    expect(el.querySelector('iframe')).toBeNull();
+    await finishAnimation(fixture, el);
+
+    el.querySelector('app-card-player')?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    );
+    await fixture.whenStable();
+    await finishAnimation(fixture, el);
+
+    expect(el.querySelector('app-card-player')).toBeNull();
   });
 
   it('com prévia, usa o player próprio e não o do Spotify', async () => {

@@ -13,7 +13,13 @@
   />
 </div>
 @if (isEmbedOpen() && embedUrl(); as url) {
-  <app-spotify-embed class="card__embed" [url]="url" [title]="t.title" />
+  <app-card-player
+    [url]="url"
+    [title]="t.title"
+    [coverUrl]="t.albumImageUrl ?? t.thumbnailUrl"
+    [origin]="playerOrigin()"
+    (closed)="onPlayerClosed()"
+  />
 }
 
 <div class="card__body">

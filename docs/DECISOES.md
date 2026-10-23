@@ -96,6 +96,16 @@ A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o servi
 - A aparência do iframe não é controlável, e os testes só verificam o endereço, não o conteúdo.
 - A URL só é montada a partir de um ID com o formato do Spotify (22 caracteres base62), validado por uma função pura antes de ser marcada como confiável no iframe.
 
+**O player ocupa o próprio card.** Uma primeira versão abria o player numa faixa abaixo da capa; no card estreito, o layout compacto do Spotify cortava o botão de play. Agora a capa da faixa, desfocada, cobre o card num círculo que nasce no botão tocado (`clip-path`), e o player entra por cima quando o círculo termina: o de 352 px (com capa) no card vertical e o compacto no card horizontal do celular. Alternativas descartadas:
+
+| Alternativa | Por que não |
+|---|---|
+| Barra fixa no rodapé | Tapa conteúdo no celular e afasta o player da faixa |
+| Card que gira em 3D | Iframes dentro de transformações 3D têm falhas conhecidas (cliques, cintilação) |
+| Card que cresce para duas colunas | Desloca a grade |
+
+O iframe nunca fica dentro de uma animação: só é montado depois da revelação e é removido antes do fechamento. A grade não se move, o foco vai para "fechar" ao abrir e volta ao botão da faixa ao fechar, e Esc fecha.
+
 **Peso visual proporcional à importância de cada mensagem.**
 
 | Mensagem | Tratamento |
@@ -113,6 +123,7 @@ A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o servi
 | Entrada dos cartões em cascata | `animation-delay` por índice |
 | Reordenação A–Z ↔ Z–A | View Transitions API: os cartões deslizam até a nova posição |
 | Progresso da prévia | `transform: scaleX` |
+| Abertura do player do Spotify | Círculo (`clip-path`) a partir do botão tocado; com movimento reduzido, fade curto |
 
 **Acessibilidade:** regras de acessibilidade de template no lint e auditoria AXE (WCAG 2.1 AA) nos testes E2E, com zero violações em desktop e mobile.
 

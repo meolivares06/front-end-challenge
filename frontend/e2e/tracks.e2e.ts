@@ -83,23 +83,46 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await expect(card.getByRole('progressbar')).toHaveCount(0);
   });
 
-  test('sem prévia, abre o player do Spotify da faixa', async () => {
+  test('sem prévia, revela o player do Spotify no card e fecha com Esc', async ({ page }) => {
     const card = tracks.card('Louca');
-    await card.getByRole('button', { name: 'Ouvir "Louca" no player do Spotify' }).click();
+    const play = card.getByRole('button', { name: 'Ouvir "Louca" no player do Spotify' });
+    await play.click();
 
+    // A face do player cobre o card; o iframe entra quando a revelação termina.
+    const player = card.getByRole('region', { name: 'Player do Spotify: Louca' });
+    await expect(player).toBeVisible();
     // Só o endereço é verificado: o conteúdo do iframe é do Spotify.
-    await expect(card.locator('iframe')).toHaveAttribute(
+    await expect(player.locator('iframe')).toHaveAttribute(
       'src',
       'https://open.spotify.com/embed/track/5w4O21KEy5RBVCiecgmSMo?theme=0',
     );
-    await card.getByRole('button', { name: /Fechar o player do Spotify/ }).click();
-    await expect(card.locator('iframe')).toHaveCount(0);
+    const close = player.getByRole('button', { name: /Fechar o player do Spotify/ });
+    await expect(close).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(player).toHaveCount(0);
+    await expect(play).toBeFocused();
   });
 
   test('não tem violações de acessibilidade (WCAG 2.1 AA)', async ({ page }) => {
     await tracks.waitForAnimations(); // medir contraste no meio do fade-in daria falso positivo
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  test('não tem violações de acessibilidade com o player do Spotify aberto', async ({ page }) => {
+    const card = tracks.card('Louca');
+    await card.getByRole('button', { name: 'Ouvir "Louca" no player do Spotify' }).click();
+    await expect(card.locator('iframe')).toBeAttached();
+    await tracks.waitForAnimations();
+
+    // O conteúdo do iframe é do Spotify e fica fora da auditoria; a moldura é nossa.
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .exclude('iframe')
       .analyze();
 
     expect(results.violations).toEqual([]);
