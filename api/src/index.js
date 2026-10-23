@@ -7,6 +7,7 @@ import { composeApp } from './compose.js';
  * Na Vercel, `public/` (o build do Angular) é servido pela CDN antes de chegar aqui.
  */
 const app = express();
+app.disable('x-powered-by');
 app.use(composeApp().app);
 
 export default app;
