@@ -25,6 +25,7 @@ O contexto e as alternativas de cada decisão estão em `docs/DECISOES.md`; a es
 - `available_markets` foi removido em Development Mode → disponibilidade no BR via `market=BR` + `is_playable`.
 - `preview_url` vem `null` para apps novos → quando há URL, toca a prévia no player próprio; sem ela, o botão abre o player incorporado do Spotify (pelo ID da faixa).
 - Sem endpoint em lote → uma busca por ISRC, em paralelo.
+- Desde fev/2026, apps em Development Mode só funcionam com **Premium** na conta dona do app (sem isso, a API recusa as requisições); por isso o projeto roda sem credenciais em modo de demonstração.
 
 ## Como testar
 

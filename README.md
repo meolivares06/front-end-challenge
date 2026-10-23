@@ -6,7 +6,7 @@ Se a integração cair, a página avisa e oferece **"Tentar de novo"**; se só p
 
 **Demo pública (dados reais do Spotify):** https://isrc-spotify-challenge.vercel.app
 
-> Localmente, sem credenciais, o projeto roda em **modo demonstração**: metadados reais dos ISRCs, com alguns estados simulados para mostrar todos os casos da tela, e aviso visível. Veja [Dados reais](#dados-reais-spotify).
+> Localmente, sem credenciais, o projeto roda em **modo demonstração**: metadados reais dos ISRCs, com alguns estados simulados para mostrar todos os casos da tela, e aviso visível. Testar com dados reais exige credenciais de um app do Spotify cuja conta dona seja **Premium**: veja [Dados reais](#dados-reais-spotify).
 
 ---
 
