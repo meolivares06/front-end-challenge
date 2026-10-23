@@ -46,5 +46,6 @@ cd frontend && npm install && npm test && npm start   # http://localhost:4200
 - Camada de cache no store/API se a lista de ISRCs crescer.
 - Deploy da API + frontend (ex.: Vercel/Render) para a página ficar pública.
 - Migrar as fronteiras para Sheriff quando houver uma segunda feature (gatilho documentado na bitácora).
+- Hooks de Git como camada local de verificação: Husky + lint-staged no `pre-commit` (ESLint e Prettier só nos arquivos alterados) e commitlint no `commit-msg` (Conventional Commits). Complementa o CI, que continua sendo a autoridade, porque um hook pode ser pulado com `--no-verify`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
