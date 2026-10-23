@@ -28,7 +28,7 @@ describe('TracksPageComponent (integração)', () => {
   });
 
   const respondAll = (respond: (isrc: string, index: number) => void) =>
-    CONTRACT_ISRCS.forEach((isrc, i) => respond(isrc, i));
+    CONTRACT_ISRCS.forEach((isrc, i) => respond(isrc.value, i));
 
   it('exibe as faixas ordenadas por título com duração mm:ss e selo BR', async () => {
     const titles = ['Zebra', 'Água', 'Bloco'];

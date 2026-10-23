@@ -15,7 +15,7 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
 
   test('lista as faixas encontradas, avisa o modo demonstração e o ISRC não encontrado', async () => {
     await expect(tracks.alert('Modo demonstração: dados fictícios')).toBeVisible();
-    await expect(tracks.alert('1 ISRC não encontrado')).toContainText('QZNJX2078148');
+    await expect(tracks.alert('1 ISRC não encontrado')).toContainText('QZ-NJX-20-78148');
     await expect(tracks.cards).toHaveCount(9);
   });
 
@@ -35,6 +35,7 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     await expect(card).toContainText('Mara Keyes');
     await expect(card).toContainText('04 de out de 2019');
     await expect(card).toContainText('03:25');
+    await expect(card).toContainText('BX-KZM-19-00338'); // ISRC na forma de leitura (Value Object)
     await expect(card.getByRole('link', { name: /Spotify/ })).toHaveAttribute('target', '_blank');
 
     for (const text of await tracks.cards.allInnerTexts()) {

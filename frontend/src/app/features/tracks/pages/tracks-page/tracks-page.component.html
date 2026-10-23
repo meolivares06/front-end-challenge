@@ -30,7 +30,7 @@
 @switch (store.status()) {
   @case ('loading') {
     <div class="grid" aria-busy="true" aria-label="Carregando faixas">
-      @for (isrc of store.isrcs; track isrc) {
+      @for (isrc of store.isrcs; track isrc.value) {
         <app-track-skeleton />
       }
     </div>
@@ -66,7 +66,7 @@
           tone="info"
           heading="{{ store.notFound().length }} ISRC não encontrado no Spotify"
         >
-          {{ store.notFound().join(', ') }}
+          {{ notFoundLabel() }}
         </app-alert>
       }
     </div>

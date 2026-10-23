@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { buildTrack } from '@testing/track.fixture';
 import { type Observable, of, Subject, throwError } from 'rxjs';
+import { Isrc } from '../models/isrc.value-object';
 import type { TracksResult } from '../models/track.model';
 import { TRACKS_REPOSITORY } from '../ports/tracks-repository.port';
 import { TRACKS_STORE, type TracksStorePort } from '../ports/tracks-store.port';
@@ -8,7 +9,7 @@ import { IntegrationUnavailableError } from '../services/track-api.service';
 import { provideTracksFeature } from '../tracks.providers';
 
 describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
-  let getTracks: ReturnType<typeof vi.fn<(isrcs: readonly string[]) => Observable<TracksResult>>>;
+  let getTracks: ReturnType<typeof vi.fn<(isrcs: readonly Isrc[]) => Observable<TracksResult>>>;
   let store: TracksStorePort;
 
   beforeEach(() => {
@@ -27,7 +28,7 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
           buildTrack({ isrc: 'B', title: 'Zebra', availableInBrazil: false }),
           buildTrack({ isrc: 'A', title: 'Água' }),
         ],
-        notFound: ['X'],
+        notFound: [Isrc.create('QZNJX2078148')],
         source: 'mock',
       }),
     );
@@ -37,7 +38,7 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
     expect(store.status()).toBe('ready');
     expect(store.tracks().map((t) => t.title)).toEqual(['Água', 'Zebra']);
     expect(store.availableInBrazil()).toBe(1);
-    expect(store.notFound()).toEqual(['X']);
+    expect(store.notFound().map(String)).toEqual(['QZNJX2078148']);
     expect(store.hasNoPreviews()).toBe(true);
     expect(store.source()).toBe('mock');
   });

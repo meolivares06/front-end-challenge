@@ -1,4 +1,5 @@
 import { InjectionToken, type Signal } from '@angular/core';
+import type { Isrc } from '../models/isrc.value-object';
 import type { DataSource, LoadStatus, SortDirection, Track } from '../models/track.model';
 
 /**
@@ -6,10 +7,10 @@ import type { DataSource, LoadStatus, SortDirection, Track } from '../models/tra
  * Componentes injetam `TRACKS_STORE`, nunca a implementação (NgRx Signal Store).
  */
 export interface TracksStorePort {
-  readonly isrcs: readonly string[];
+  readonly isrcs: readonly Isrc[];
   readonly status: Signal<LoadStatus>;
   readonly tracks: Signal<readonly Track[]>;
-  readonly notFound: Signal<readonly string[]>;
+  readonly notFound: Signal<readonly Isrc[]>;
   readonly direction: Signal<SortDirection>;
   readonly source: Signal<DataSource | null>;
   readonly total: Signal<number>;

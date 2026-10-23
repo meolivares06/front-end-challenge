@@ -1,3 +1,5 @@
+import type { Isrc } from './isrc.value-object';
+
 export type ReleaseDatePrecision = 'year' | 'month' | 'day';
 
 /** Contrato devolvido pela API (BFF) para cada ISRC. */
@@ -26,6 +28,6 @@ export type DataSource = 'spotify' | 'mock';
 
 export interface TracksResult {
   readonly tracks: readonly Track[];
-  readonly notFound: readonly string[];
+  readonly notFound: readonly Isrc[];
   readonly source: DataSource;
 }

@@ -1,5 +1,6 @@
 import { InjectionToken } from '@angular/core';
 import type { Observable } from 'rxjs';
+import type { Isrc } from '../models/isrc.value-object';
 import type { TracksResult } from '../models/track.model';
 
 /**
@@ -7,7 +8,7 @@ import type { TracksResult } from '../models/track.model';
  * O store depende deste contrato; a implementação HTTP é ligada em `provideTracksFeature()`.
  */
 export interface TracksRepository {
-  getTracks(isrcs: readonly string[]): Observable<TracksResult>;
+  getTracks(isrcs: readonly Isrc[]): Observable<TracksResult>;
 }
 
 export const TRACKS_REPOSITORY = new InjectionToken<TracksRepository>('TracksRepository');

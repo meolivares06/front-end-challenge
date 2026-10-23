@@ -2,6 +2,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { IconComponent } from '@shared/icons/icon.component';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
+import { Isrc } from '../../models/isrc.value-object';
 import type { Track } from '../../models/track.model';
 import { formatReleaseDate } from '../../utils/format-release-date';
 import { AudioPreviewComponent } from '../audio-preview/audio-preview.component';
@@ -20,5 +21,6 @@ export class TrackCardComponent {
   protected readonly releaseDate = computed(() =>
     formatReleaseDate(this.track().releaseDate, this.track().releaseDatePrecision),
   );
+  protected readonly isrcLabel = computed(() => Isrc.create(this.track().isrc).format());
   protected readonly artists = computed(() => this.track().artists.join(', '));
 }

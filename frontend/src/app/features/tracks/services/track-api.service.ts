@@ -1,6 +1,7 @@
 import { HttpClient, type HttpErrorResponse, type HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, type Observable, of, throwError } from 'rxjs';
+import type { Isrc } from '../models/isrc.value-object';
 import type { DataSource, Track, TracksResult } from '../models/track.model';
 import type { TracksRepository } from '../ports/tracks-repository.port';
 
@@ -13,7 +14,7 @@ export class IntegrationUnavailableError extends Error {
 }
 
 interface Lookup {
-  isrc: string;
+  isrc: Isrc;
   track: Track | null;
   source: DataSource;
 }
@@ -31,7 +32,7 @@ export class TrackApiService implements TracksRepository {
    * Busca todos os ISRCs em paralelo. Um ISRC inexistente (404) vira "não encontrado";
    * qualquer outra falha significa que a integração está fora e interrompe o carregamento.
    */
-  getTracks(isrcs: readonly string[]): Observable<TracksResult> {
+  getTracks(isrcs: readonly Isrc[]): Observable<TracksResult> {
     return forkJoin(isrcs.map((isrc) => this.lookup(isrc))).pipe(
       map((lookups) => ({
         tracks: lookups.flatMap(({ track }) => (track ? [track] : [])),
@@ -41,9 +42,9 @@ export class TrackApiService implements TracksRepository {
     );
   }
 
-  private lookup(isrc: string): Observable<Lookup> {
+  private lookup(isrc: Isrc): Observable<Lookup> {
     return this.http
-      .get<Track>(`${this.baseUrl}/${encodeURIComponent(isrc)}`, { observe: 'response' })
+      .get<Track>(`${this.baseUrl}/${encodeURIComponent(isrc.value)}`, { observe: 'response' })
       .pipe(
         map((response) => ({ isrc, track: response.body, source: readSource(response.headers) })),
         catchError((error: HttpErrorResponse) =>

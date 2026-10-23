@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, type OnInit } from '@angular/core';
 import { AlertComponent } from '@shared/components/alert/alert.component';
 import { IconComponent } from '@shared/icons/icon.component';
 import { withViewTransition } from '@shared/utils/view-transition';
@@ -19,6 +19,13 @@ import { provideTracksFeature } from '../../tracks.providers';
 export class TracksPageComponent implements OnInit {
   /** Depende da porta, não da implementação (DIP). */
   protected readonly store = inject(TRACKS_STORE);
+
+  protected readonly notFoundLabel = computed(() =>
+    this.store
+      .notFound()
+      .map((isrc) => isrc.format())
+      .join(', '),
+  );
 
   ngOnInit(): void {
     this.store.load();
