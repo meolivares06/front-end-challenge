@@ -10,7 +10,7 @@ import { TracksPageComponent } from '@features/tracks/pages/tracks-page/tracks-p
       <app-tracks-page />
     </main>
     <footer class="shell shell__footer">
-      Dados fornecidos pela Spotify Web API. Nada é armazenado.
+      Integração com a Spotify Web API. Nada é armazenado.
     </footer>
   `,
 })

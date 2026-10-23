@@ -56,7 +56,7 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 
 - [ ] Teste no nível certo de cada camada alterada (seção 6 de `docs/ARQUITETURA.md`).
 - [ ] `npm run lint:boundaries && npm run lint && npm run test:coverage && npm run build` em `frontend/`; `npm run test:coverage` em `api/`; `npm run e2e` se a tela mudou.
-- [ ] Decisão nova → seção em `docs/BITACORA.md`; estrutura nova → `docs/ARQUITETURA.md`.
+- [ ] Decisão nova → seção em `docs/DECISOES.md`; estrutura nova → `docs/ARQUITETURA.md`.
 
 ## Convenções
 
@@ -64,4 +64,4 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 - O projeto é Angular **21**: não use APIs da v22 (`@Service()`, Signal Forms). As skills `angular/skills` não estão instaladas por isso.
 - Commits em Conventional Commits, em português: `feat(frontend): ...`, `test(api): ...`.
 - Código e nomes técnicos em inglês; textos da interface, documentação e commits em português.
-- Toda decisão relevante entra em `docs/BITACORA.md`: contexto, decisão, o que foi descartado e como verificar.
+- Toda decisão relevante entra em `docs/DECISOES.md`: contexto, decisão, o que foi descartado e como verificar.

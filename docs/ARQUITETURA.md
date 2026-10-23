@@ -1,6 +1,6 @@
 # Arquitetura
 
-Como o projeto está organizado **hoje** e como acrescentar código sem quebrar as regras. É a primeira leitura de quem chega, pessoa ou agente de IA. O porquê de cada decisão, em ordem cronológica, está em [BITACORA.md](BITACORA.md).
+Como o projeto está organizado **hoje** e como acrescentar código sem quebrar as regras. É a primeira leitura de quem chega, pessoa ou agente de IA. O porquê de cada decisão está em [DECISOES.md](DECISOES.md).
 
 ---
 
@@ -435,7 +435,7 @@ export function buildArtist(overrides: Partial<Artist> = {}): Artist {
 - **Imports de tipo** com `import type` (`verbatimModuleSyntax`).
 - **Idiomas:** código em inglês; interface, documentação e commits em português.
 - **Commits:** Conventional Commits (`feat(frontend): …`).
-- **Decisão nova** → uma seção na [bitácora](BITACORA.md); **estrutura nova** → esta guia; **regra nova** → `AGENTS.md` e, se der, uma regra no ESLint.
+- **Decisão nova** → uma seção em [DECISOES.md](DECISOES.md); **estrutura nova** → esta guia; **regra nova** → `AGENTS.md` e, se der, uma regra no ESLint.
 
 ## 8. API (BFF)
 

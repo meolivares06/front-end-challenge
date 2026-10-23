@@ -1,51 +1,47 @@
-## O que foi feito
+## O que foi entregue
 
-Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spotify Web API e exibe capa, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e disponibilidade no BR, ordenados por título.
+Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spotify Web API e exibe, em ordem alfabética por título: capa do álbum, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e disponibilidade no Brasil.
 
-- `api/`: BFF mínimo em Express que protege o Client Secret (fluxo Client Credentials com cache de token).
-- `frontend/`: vertical slice `features/tracks` + `shared`; standalone components, signals e zoneless.
-- Estado com **NgRx Signal Store** e inversão de dependência por `InjectionToken`: a página injeta `TRACKS_STORE`, o store injeta `TRACKS_REPOSITORY`; só `provideTracksFeature()` conhece as implementações, e o lint impede o atalho.
-- Alerta com "Tentar de novo" quando a integração está indisponível; aviso separado para ISRCs não encontrados.
-- Responsiva (grade → lista no celular) com transições que respeitam `prefers-reduced-motion`.
+**Demo:** https://isrc-spotify-challenge.vercel.app
 
-- Fronteiras de arquitetura protegidas por ESLint (`npm run lint`), com prova executável (`npm run lint:boundaries`).
-- TypeScript estrito ampliado e modelos `readonly`.
-- CI no GitHub Actions (`.github/workflows/ci.yml`): fronteiras, lint, testes com cobertura e build, em passos separados.
-- Cobertura mínima de 90% por arquivo na lógica pura (frontend e API).
-- Decisões registradas passo a passo em `docs/BITACORA.md`, incluindo o porquê de ESLint em vez de Sheriff por enquanto.
+- Alerta com "Tentar de novo" quando a integração está indisponível.
+- ISRCs não encontrados aparecem como cartão na grade, e o resumo indica quantas faixas foram encontradas.
+- Responsiva, acessível (AXE sem violações) e com animações que respeitam `prefers-reduced-motion`.
+- Nenhum dado é armazenado.
 
-- Governança de IA: `AGENTS.md` do projeto + boas práticas oficiais geradas pelo Angular CLI, MCP do Angular em modo somente leitura (`docs/GOVERNANCA-IA.md`).
-- Conferência com as regras oficiais do Angular: `NgOptimizedImage` adotado e 0 violações AXE.
+## Decisões principais
 
-- **Modo mock** no BFF enquanto a conta Premium não é configurada: mesmo contrato do Spotify, catálogo fictício que cobre todos os estados da tela, prévias de áudio tocáveis e simulação de queda. Troca para dados reais só com variável de ambiente.
+- **BFF em Express** (`api/`): guarda o Client Secret, que nunca chega ao navegador.
+- **Frontend em vertical slices com ports & adapters**: estado em NgRx Signal Store; a página e o store dependem de portas (`InjectionToken`), e só `provideTracksFeature()` conhece as implementações.
+- **Value Object `Isrc`**: normaliza e valida o identificador central do domínio.
+- **Fronteiras verificadas pelo ESLint**, com prova executável (`npm run lint:boundaries`).
+- **Modo de demonstração**: com o mesmo contrato do cliente real, enquanto a conta Spotify não tem Premium (exigência de fev/2026).
 
-- **Testes E2E** com Playwright (desktop e mobile) contra a API em modo mock, incluindo AXE e prévia de áudio tocando; job próprio no CI.
+O contexto e as alternativas de cada decisão estão em `docs/DECISOES.md`; a estrutura do código, em `docs/ARQUITETURA.md`.
 
-## Pontos de atenção (limitações atuais da API do Spotify)
+## Limitações atuais da API do Spotify
 
-- `available_markets` foi removido em Development Mode (fev/2026) → disponibilidade no BR via `market=BR` + `is_playable`.
-- `preview_url` vem `null` para apps novos → o player existe e funciona com URL; sem ela, o botão fica desabilitado e explicado.
+- `available_markets` foi removido em Development Mode → disponibilidade no BR via `market=BR` + `is_playable`.
+- `preview_url` vem `null` para apps novos → o player funciona quando há URL; sem ela, o botão fica desabilitado e explicado.
 - Sem endpoint em lote → uma busca por ISRC, em paralelo.
-
-Detalhes e links na seção **Decisões técnicas e limitações** do README.
 
 ## Como testar
 
-Não precisa de credenciais: sem elas, a API sobe em **modo mock** (dados fictícios, aviso visível na tela).
+Sem credenciais, a API sobe em modo de demonstração. Os passos estão no README.
 
-```bash
-cd api && cp .env.example .env && npm install && npm test && npm start
-cd frontend && npm install && npm test && npm start   # http://localhost:4200
-```
+| Nível | Comando |
+|---|---|
+| Unitários + integração (API e frontend) | `npm run test:coverage` |
+| Fronteiras e lint (frontend) | `npm run lint:boundaries && npm run lint` |
+| Ponta a ponta, desktop e mobile | `npm run e2e` |
 
-- Alerta de integração indisponível: `SPOTIFY_MOCK_SCENARIO=down` no `api/.env` e reiniciar a API (ou simplesmente parar a API e clicar em "Tentar de novo").
-- Spotify real: `SPOTIFY_MODE=live` + credenciais (exige Premium na conta dona do app).
+- Integração indisponível: `SPOTIFY_MOCK_SCENARIO=down` em `api/.env`.
+- Dados reais: `SPOTIFY_MODE=live` com credenciais (exige Premium na conta dona do app).
 
-## Próximos passos (próxima iteração)
+O CI (GitHub Actions) roda tudo isso em cada push.
 
-- Camada de cache no store/API se a lista de ISRCs crescer.
-- Deploy da API + frontend (ex.: Vercel/Render) para a página ficar pública.
-- Migrar as fronteiras para Sheriff quando houver uma segunda feature (gatilho documentado na bitácora).
-- Hooks de Git como camada local de verificação: Husky + lint-staged no `pre-commit` (ESLint e Prettier só nos arquivos alterados) e commitlint no `commit-msg` (Conventional Commits). Complementa o CI, que continua sendo a autoridade, porque um hook pode ser pulado com `--no-verify`.
+## Próximos passos
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+- Cache na API se a lista de ISRCs crescer.
+- Migrar as fronteiras para o Sheriff quando houver uma segunda feature.
+- Hooks de Git (Husky + lint-staged + commitlint) como verificação local, complementando o CI.

@@ -4,7 +4,7 @@ Página que consulta **10 ISRCs** na Spotify Web API e mostra, **em ordem alfab�
 capa do álbum, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e se a faixa **está disponível no Brasil**.
 Se a integração cair, a página avisa e oferece **"Tentar de novo"**.
 
-**🌐 Demo pública:** https://api-two-rose-44.vercel.app
+**Demo pública:** https://isrc-spotify-challenge.vercel.app
 
 > Sem credenciais do Spotify, o projeto roda em **modo demonstração** (dados fictícios, com aviso na tela). Veja [Dados reais](#dados-reais-spotify).
 
@@ -61,19 +61,18 @@ O mesmo roda no CI a cada push ([`.github/workflows/ci.yml`](.github/workflows/c
 
 ---
 
-## Como está feito (em uma frase por peça)
+## Arquitetura em resumo
 
 - **`frontend/`:** Angular 21 (LTS), com uma pasta por funcionalidade e estado em NgRx Signal Store.
 - **`api/`:** um servidor intermediário (BFF) em Express. Guarda o segredo do Spotify, que nunca vai para o navegador.
-- **Arquitetura:** vertical slices com ports & adapters; os princípios SOLID são verificados por lint e testes ([como, princípio a princípio](docs/ARQUITETURA.md#3-princípios-solid-e-camadas)).
-- **Regras de arquitetura:** o ESLint barra imports entre camadas que não devem se conhecer.
+- **Organização:** vertical slices com ports & adapters. O ESLint barra imports entre camadas que não devem se conhecer, e os princípios SOLID são verificados por lint e testes ([princípio a princípio](docs/ARQUITETURA.md#3-princípios-solid-e-camadas)).
 
 ## Documentação de apoio
 
 | Quero… | Leia |
 |---|---|
 | **Entender a arquitetura** e saber onde colocar código novo | [docs/ARQUITETURA.md](docs/ARQUITETURA.md) |
-| Saber **por que** cada decisão foi tomada, em ordem | [docs/BITACORA.md](docs/BITACORA.md) |
+| Saber **por que** cada decisão foi tomada | [docs/DECISOES.md](docs/DECISOES.md) |
 | Ver como a **IA** é usada e controlada no projeto | [docs/GOVERNANCA-IA.md](docs/GOVERNANCA-IA.md) |
 | Dar instruções a um **agente de IA** | [AGENTS.md](AGENTS.md) |
 | Ver o **resumo da entrega** e os próximos passos | [PULL_REQUEST.md](PULL_REQUEST.md) |
@@ -90,7 +89,7 @@ SPOTIFY_CLIENT_SECRET=...
 
 …e reinicie a API. O frontend não muda. Outras opções (como simular o Spotify fora do ar) estão em [`api/.env.example`](api/.env.example).
 
-**Limites atuais da API do Spotify** (detalhes na [bitácora](docs/BITACORA.md#1-leitura-do-desafio-e-impedimentos)):
+**Limites atuais da API do Spotify** (detalhes em [DECISOES.md](docs/DECISOES.md#1-limitações-da-spotify-web-api)):
 - a lista de países disponíveis foi removida, então a disponibilidade no BR vem de `market=BR` + `is_playable`;
 - o link da prévia de áudio (`preview_url`) vem vazio para apps novas, e a página explica isso;
 - não há busca em lote, então é uma busca por ISRC, em paralelo.

@@ -35,7 +35,7 @@ Como este repositório orienta e limita o trabalho de agentes de IA (Claude Code
 
 ## 2. Conferência com a documentação oficial do Angular
 
-Antes de escrever o `AGENTS.md`, conferi a seção de IA do angular.dev ([Develop with AI](https://angular.dev/ai/develop-with-ai) e [MCP](https://angular.dev/ai/mcp)) e o que o Angular CLI 21 instalado oferece de fato.
+Antes de escrever o `AGENTS.md`, foram consultadas a seção de IA do angular.dev ([Develop with AI](https://angular.dev/ai/develop-with-ai) e [MCP](https://angular.dev/ai/mcp)) e o que o Angular CLI 21 instalado oferece de fato.
 
 | O que o Angular oferece | Situação aqui | Decisão |
 |---|---|---|
@@ -44,12 +44,12 @@ Antes de escrever o `AGENTS.md`, conferi a seção de IA do angular.dev ([Develo
 | **`llms.txt` / `llms-full.txt`** | Índice da documentação para LLMs | Não versionado: o MCP (`search_documentation`) já consulta a doc oficial sob demanda |
 | **Agent skills** (`npx skills add https://github.com/angular/skills`) | Guias carregados sob demanda (`angular-developer` com 46 referências, `angular-new-app`) | **Não adotado.** Ver a seção 4.1 |
 
-**O que a conferência mudou no plano inicial** (baseado no artigo do Ortega Van, parte 3):
+**O que a consulta mudou no plano inicial:**
 
 - O plano era escrever um `AGENTS.md` único com as regras de estilo Angular (standalone, OnPush, signals…). **Não é necessário:** o Angular publica e gera essas regras oficialmente. Copiar criaria duas fontes que divergem a cada versão.
-- Por isso o nosso `AGENTS.md` ficou com **só o que é específico do projeto** (53 linhas). Também segue o conselho do artigo: não repetir o que o lint já exige, e as fronteiras só são citadas com link.
+- Por isso o nosso `AGENTS.md` ficou com **só o que é específico do projeto** (53 linhas). O que o lint já exige não é repetido, e as fronteiras só são citadas com link.
 
-**Divergência de versão (atenção ao expor).** A doc no angular.dev já está na **v22**, que diz "não declare `OnPush`" porque virou padrão. O arquivo gerado pelo CLI **21**, a versão do projeto, diz "declare `OnPush`". Seguimos o da nossa versão: por isso o arquivo é **gerado pelo CLI do projeto**, e não baixado do site.
+**Divergência de versão.** A doc no angular.dev já está na **v22**, que diz "não declare `OnPush`" porque virou padrão. O arquivo gerado pelo CLI **21**, a versão do projeto, diz "declare `OnPush`". Seguimos o da nossa versão: por isso o arquivo é **gerado pelo CLI do projeto**, e não baixado do site.
 
 ---
 
@@ -149,11 +149,11 @@ Desde a v20, o Angular CLI gera arquivos **sem sufixo de tipo** (`app.ts`, class
 
 | Seção | Por quê |
 |---|---|
-| **Comandos** primeiro | O agente precisa saber como verificar o próprio trabalho antes de ler prosa (conselho do artigo, parte 3) |
-| **Arquitetura** em 5 linhas + link | O detalhe está na bitácora e é exigido pelo lint, então não precisa ser repetido |
+| **Comandos** primeiro | O agente precisa saber como verificar o próprio trabalho antes de ler prosa |
+| **Arquitetura** em 5 linhas + link | O detalhe está em `docs/ARQUITETURA.md` e é exigido pelo lint, então não precisa ser repetido |
 | **Decisões fora do padrão** | É onde um agente erraria seguindo as regras genéricas: store provido na página, sufixo `-api.service`, sem rotas, regra do BR |
 | **Proibido** | Limites que o lint não consegue expressar: segredos, exceções nas fronteiras, novas dependências, baixar cobertura, editar o arquivo gerado |
-| **Convenções** | Nomes com sufixo de tipo, versão do Angular (sem APIs da v22), idioma de código/interface/commits, registro na bitácora |
+| **Convenções** | Nomes com sufixo de tipo, versão do Angular (sem APIs da v22), idioma de código/interface/commits, registro de decisões |
 
 ---
 
@@ -175,7 +175,7 @@ Desde a v20, o Angular CLI gera arquivos **sem sufixo de tipo** (`app.ts`, class
 ## 7. Como manter
 
 - **Ao atualizar o Angular** (ex.: v22): regenerar `npx ng g ai-config --tool=agents` em `frontend/`, revisar o diff e atualizar `@angular/cli@<versão>` no `.mcp.json`.
-- **Ao surgir uma nova decisão fora do padrão:** uma linha no `AGENTS.md` e a explicação na bitácora.
+- **Ao surgir uma nova decisão fora do padrão:** uma linha no `AGENTS.md` e a explicação em `docs/DECISOES.md`.
 - **Manter o `AGENTS.md` curto** (meta: < 150 linhas). Se uma regra puder virar lint, ela sai do texto e vira lint.
 
 ## Referências
@@ -183,4 +183,3 @@ Desde a v20, o Angular CLI gera arquivos **sem sufixo de tipo** (`app.ts`, class
 - [Angular — Develop with AI](https://angular.dev/ai/develop-with-ai)
 - [Angular — Angular CLI MCP Server](https://angular.dev/ai/mcp)
 - [AGENTS.md](https://agents.md/)
-- [Como eu configuro um projeto greenfield em Angular — Parte 3](https://medium.com/@ortegavan/como-eu-configuro-um-projeto-greenfield-em-angular-parte-3-74b1e26c6f35)
