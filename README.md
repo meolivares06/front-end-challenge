@@ -4,6 +4,8 @@ Página que consulta **10 ISRCs** na Spotify Web API e mostra, **em ordem alfab�
 capa do álbum, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e se a faixa **está disponível no Brasil**.
 Se a integração cair, a página avisa e oferece **"Tentar de novo"**.
 
+**🌐 Demo pública:** https://api-two-rose-44.vercel.app
+
 > Sem credenciais do Spotify, o projeto roda em **modo demonstração** (dados fictícios, com aviso na tela). Veja [Dados reais](#dados-reais-spotify).
 
 ---

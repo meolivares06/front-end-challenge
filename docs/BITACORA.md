@@ -23,7 +23,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 17 | [Testes E2E](#17-testes-e2e) | ver no histórico |
 | 18 | [NgRx Signal Store e inversão de dependência](#18-ngrx-signal-store-e-inversão-de-dependência) | `26170bb` `01efbb2` |
 | 19 | [Value Object Isrc](#19-value-object-isrc) | `40d4224` |
-| 20 | [Guia de arquitetura validada por agente às cegas](#20-guia-de-arquitetura-validada-por-agente-às-cegas) | ver abaixo |
+| 20 | [Guia de arquitetura validada por agente às cegas](#20-guia-de-arquitetura-validada-por-agente-às-cegas) | `6b6c048` |
+| 21 | [Deploy na Vercel](#21-deploy-na-vercel) | `20993e4` `265ae8e` `5160899` |
 
 ---
 
@@ -610,4 +611,23 @@ TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──
 As falhas da rodada 2 viraram notas na guia: `noUncheckedIndexedAccess` nos testes, a cobertura que conta ramos, substituir o spec gerado pelo CLI, o estado vazio e onde converter para o VO.
 
 **Conclusão para a apresentação.** O lint garante que nada quebra as regras; a rodada 1 mostrou que isso **não basta** para o código sair consistente. Com a guia, o código gerado por IA (ou escrito por quem chega) segue os mesmos padrões do existente. A guia foi tratada como código: escrita, testada e corrigida.
+
+---
+
+## 21. Deploy na Vercel
+
+**Resultado.** Demo pública em **https://api-two-rose-44.vercel.app**, em modo mock (sem segredos). Ela é redeployada a cada push na `main` do repositório.
+
+**Configuração.** Projeto Vercel com *Root Directory* `api` e preset Express. O `api/vercel.json` define o build: compila o Angular e copia o resultado para `api/public`.
+
+**Dois erros encontrados no primeiro deploy, e as correções:**
+
+| Erro | Causa | Correção |
+|---|---|---|
+| `FUNCTION_INVOCATION_FAILED` — *"The default export must be a function or server"* | A Vercel escolhe a entrada pelo nome (`app` → `index` → `server`) e pegou `src/app.js`, que só exporta a fábrica `createApp` | `app.js` renomeado para `create-app.js` |
+| *"No entrypoint found which imports express"* | A entrada precisa importar o `express` e exportar a app | Nova entrada `src/index.js`. A composição saiu de `server.js` para `compose.js` e é usada pelas duas entradas: `server.js` (`npm start`, local) e `index.js` (Vercel) |
+
+**Verificação no ar:** `/` devolve o `index.html` do Angular; `/api/tracks/:isrc` responde em JSON com `X-Data-Source: mock`; as capas SVG são servidas.
+
+**Lição.** "Funciona localmente" não cobria o modelo de execução da plataforma (função, e não processo com `listen`). Os dois erros apareceram só no deploy real, o que reforça o valor do ensaio feito antes da entrega.
 
