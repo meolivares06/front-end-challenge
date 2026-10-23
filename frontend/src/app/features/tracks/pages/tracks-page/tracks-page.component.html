@@ -7,7 +7,7 @@
     </p>
   </div>
 
-  @if (store.state() === 'ready' && store.total()) {
+  @if (store.status() === 'ready' && store.total()) {
     <div class="toolbar">
       <p class="summary" aria-live="polite">
         <strong>{{ store.total() }}</strong> faixas ·
@@ -27,7 +27,7 @@
   }
 </header>
 
-@switch (store.state()) {
+@switch (store.status()) {
   @case ('loading') {
     <div class="grid" aria-busy="true" aria-label="Carregando faixas">
       @for (isrc of store.isrcs; track isrc) {

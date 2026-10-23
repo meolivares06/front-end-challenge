@@ -2,19 +2,22 @@ import { TestBed } from '@angular/core/testing';
 import { buildTrack } from '@testing/track.fixture';
 import { type Observable, of, Subject, throwError } from 'rxjs';
 import type { TracksResult } from '../models/track.model';
-import { IntegrationUnavailableError, TrackApiService } from '../services/track-api.service';
-import { TracksStore } from './tracks.store';
+import { TRACKS_REPOSITORY } from '../ports/tracks-repository.port';
+import { TRACKS_STORE, type TracksStorePort } from '../ports/tracks-store.port';
+import { IntegrationUnavailableError } from '../services/track-api.service';
+import { provideTracksFeature } from '../tracks.providers';
 
-describe('TracksStore', () => {
+describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
   let getTracks: ReturnType<typeof vi.fn<(isrcs: readonly string[]) => Observable<TracksResult>>>;
-  let store: TracksStore;
+  let store: TracksStorePort;
 
   beforeEach(() => {
     getTracks = vi.fn();
     TestBed.configureTestingModule({
-      providers: [TracksStore, { provide: TrackApiService, useValue: { getTracks } }],
+      // A mesma composição da app; só a porta de dados é trocada por um dublê.
+      providers: [provideTracksFeature(), { provide: TRACKS_REPOSITORY, useValue: { getTracks } }],
     });
-    store = TestBed.inject(TracksStore);
+    store = TestBed.inject(TRACKS_STORE);
   });
 
   it('expõe as faixas ordenadas e os contadores após carregar', () => {
@@ -31,7 +34,7 @@ describe('TracksStore', () => {
 
     store.load();
 
-    expect(store.state()).toBe('ready');
+    expect(store.status()).toBe('ready');
     expect(store.tracks().map((t) => t.title)).toEqual(['Água', 'Zebra']);
     expect(store.availableInBrazil()).toBe(1);
     expect(store.notFound()).toEqual(['X']);
@@ -44,7 +47,7 @@ describe('TracksStore', () => {
 
     store.load();
 
-    expect(store.state()).toBe('loading');
+    expect(store.status()).toBe('loading');
   });
 
   it('vai para error quando a integração está indisponível', () => {
@@ -52,7 +55,7 @@ describe('TracksStore', () => {
 
     store.load();
 
-    expect(store.state()).toBe('error');
+    expect(store.status()).toBe('error');
     expect(store.tracks()).toEqual([]);
   });
 
@@ -73,5 +76,24 @@ describe('TracksStore', () => {
 
     expect(store.direction()).toBe('desc');
     expect(store.tracks()[0]?.title).toBe('Zebra');
+
+    store.toggleDirection();
+    expect(store.direction()).toBe('asc');
+  });
+
+  it('um novo load cancela a requisição anterior (switchMap)', () => {
+    const first = new Subject<TracksResult>();
+    getTracks
+      .mockReturnValueOnce(first)
+      .mockReturnValueOnce(
+        of({ tracks: [buildTrack({ title: 'Nova' })], notFound: [], source: 'spotify' }),
+      );
+
+    store.load();
+    store.load();
+    first.next({ tracks: [buildTrack({ title: 'Antiga' })], notFound: [], source: 'spotify' });
+
+    expect(store.tracks().map((t) => t.title)).toEqual(['Nova']);
+    expect(first.observed).toBe(false);
   });
 });

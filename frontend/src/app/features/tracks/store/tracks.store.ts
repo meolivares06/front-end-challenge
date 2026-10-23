@@ -1,67 +1,69 @@
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { type Subscription } from 'rxjs';
-import type { DataSource, SortDirection, Track } from '../models/track.model';
-import { TrackApiService } from '../services/track-api.service';
+import { computed, inject } from '@angular/core';
+import { tapResponse } from '@ngrx/operators';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withProps,
+  withState,
+} from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, switchMap, tap } from 'rxjs';
+import type { DataSource, LoadStatus, SortDirection, Track } from '../models/track.model';
+import { TRACKS_REPOSITORY } from '../ports/tracks-repository.port';
 import { CONTRACT_ISRCS } from '../utils/contract-isrcs';
 import { sortTracksByTitle } from '../utils/sort-tracks';
 
-export type LoadState = 'idle' | 'loading' | 'ready' | 'error';
+interface TracksState {
+  status: LoadStatus;
+  items: readonly Track[];
+  notFound: readonly string[];
+  direction: SortDirection;
+  source: DataSource | null;
+}
+
+const initialState: TracksState = {
+  status: 'idle',
+  items: [],
+  notFound: [],
+  direction: 'asc',
+  source: null,
+};
 
 /**
- * Fonte única de verdade da feature de faixas.
- * Os componentes leem o estado e disparam ações por aqui; só o store fala com o TrackApiService.
+ * Implementação de `TracksStorePort` com NgRx Signal Store.
+ * Depende só da porta `TRACKS_REPOSITORY`; quem a consome injeta `TRACKS_STORE`.
  */
-@Injectable()
-export class TracksStore {
-  private readonly api = inject(TrackApiService);
-  private readonly destroyRef = inject(DestroyRef);
-  private request?: Subscription;
-
-  private readonly _state = signal<LoadState>('idle');
-  private readonly _tracks = signal<readonly Track[]>([]);
-  private readonly _notFound = signal<readonly string[]>([]);
-  private readonly _direction = signal<SortDirection>('asc');
-  private readonly _source = signal<DataSource | null>(null);
-
-  readonly isrcs = CONTRACT_ISRCS;
-  readonly state = this._state.asReadonly();
-  readonly notFound = this._notFound.asReadonly();
-  readonly direction = this._direction.asReadonly();
-  readonly source = this._source.asReadonly();
-
-  readonly tracks = computed(() => sortTracksByTitle(this._tracks(), this._direction()));
-  readonly total = computed(() => this._tracks().length);
-  readonly availableInBrazil = computed(
-    () => this._tracks().filter((t) => t.availableInBrazil).length,
-  );
-  readonly hasNoPreviews = computed(
-    () => this.total() > 0 && this._tracks().every((t) => !t.previewUrl),
-  );
-
-  load(): void {
-    this.request?.unsubscribe();
-    this._state.set('loading');
-    this.request = this.api
-      .getTracks(this.isrcs)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ tracks, notFound, source }) => {
-          this._tracks.set(tracks);
-          this._source.set(source);
-          this._notFound.set(notFound);
-          this._state.set('ready');
-        },
-        error: () => {
-          this._tracks.set([]);
-          this._notFound.set([]);
-          this._source.set(null);
-          this._state.set('error');
-        },
-      });
-  }
-
-  toggleDirection(): void {
-    this._direction.update((d) => (d === 'asc' ? 'desc' : 'asc'));
-  }
-}
+export const TracksSignalStore = signalStore(
+  withState(initialState),
+  withProps(() => ({ isrcs: CONTRACT_ISRCS })),
+  withComputed(({ items, direction }) => ({
+    tracks: computed(() => sortTracksByTitle(items(), direction())),
+    total: computed(() => items().length),
+    availableInBrazil: computed(() => items().filter((t) => t.availableInBrazil).length),
+    hasNoPreviews: computed(() => items().length > 0 && items().every((t) => !t.previewUrl)),
+  })),
+  withMethods((store, repository = inject(TRACKS_REPOSITORY)) => ({
+    /** Um novo load cancela o anterior (switchMap). */
+    load: rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { status: 'loading' })),
+        switchMap(() =>
+          repository.getTracks(store.isrcs).pipe(
+            tapResponse({
+              next: ({ tracks, notFound, source }) =>
+                patchState(store, { status: 'ready', items: tracks, notFound, source }),
+              error: () =>
+                patchState(store, { status: 'error', items: [], notFound: [], source: null }),
+            }),
+          ),
+        ),
+      ),
+    ),
+    toggleDirection(): void {
+      const direction: SortDirection = store.direction() === 'asc' ? 'desc' : 'asc';
+      patchState(store, { direction });
+    },
+  })),
+);

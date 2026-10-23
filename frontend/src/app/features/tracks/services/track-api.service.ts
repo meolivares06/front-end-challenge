@@ -2,6 +2,7 @@ import { HttpClient, type HttpErrorResponse, type HttpHeaders } from '@angular/c
 import { inject, Injectable } from '@angular/core';
 import { catchError, forkJoin, map, type Observable, of, throwError } from 'rxjs';
 import type { DataSource, Track, TracksResult } from '../models/track.model';
+import type { TracksRepository } from '../ports/tracks-repository.port';
 
 /** Erro lançado quando o fornecedor de dados (Spotify, via API) não está disponível. */
 export class IntegrationUnavailableError extends Error {
@@ -22,7 +23,7 @@ const readSource = (headers: HttpHeaders): DataSource =>
   headers.get('X-Data-Source') === 'mock' ? 'mock' : 'spotify';
 
 @Injectable({ providedIn: 'root' })
-export class TrackApiService {
+export class TrackApiService implements TracksRepository {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/api/tracks';
 
