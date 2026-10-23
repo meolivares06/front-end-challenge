@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { createApp } from './app.js';
+import { createApp } from './create-app.js';
 import { config } from './config.js';
 import { createMockAssetsRouter } from './mock/mock-assets.routes.js';
 import { createMockSpotifyClient } from './mock/mock-spotify.client.js';

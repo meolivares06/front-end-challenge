@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/create-app.js';
 
 const staticDir = fileURLToPath(new URL('./fixtures-static', import.meta.url));
 const trackService = { getByIsrc: vi.fn().mockRejectedValue(new Error('boom')) };

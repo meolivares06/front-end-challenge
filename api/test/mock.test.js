@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/create-app.js';
 import { coverSvg, hash, previewWav } from '../src/mock/mock-assets.js';
 import { createMockAssetsRouter } from '../src/mock/mock-assets.routes.js';
 import { createMockSpotifyClient } from '../src/mock/mock-spotify.client.js';
