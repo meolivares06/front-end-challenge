@@ -1,5 +1,7 @@
 # Faixas por ISRC · Spotify Web API
 
+> 🧭 **Chegou agora?** Comece por [docs/ARQUITETURA.md](docs/ARQUITETURA.md): como o projeto está organizado e como criar uma feature.
+>
 > 📓 O passo a passo das decisões está em [docs/BITACORA.md](docs/BITACORA.md). O uso de IA no projeto está em [docs/GOVERNANCA-IA.md](docs/GOVERNANCA-IA.md).
 
 Página pública que consulta **10 ISRCs** informados por um produtor na Spotify Web API e mostra, **ordenados por título (A–Z)**:

@@ -22,7 +22,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `338516b` `3ef5b09` `678fc3c` |
 | 17 | [Testes E2E](#17-testes-e2e) | ver no histórico |
 | 18 | [NgRx Signal Store e inversão de dependência](#18-ngrx-signal-store-e-inversão-de-dependência) | `26170bb` `01efbb2` |
-| 19 | [Value Object Isrc](#19-value-object-isrc) | ver abaixo |
+| 19 | [Value Object Isrc](#19-value-object-isrc) | `40d4224` |
+| 20 | [Guia de arquitetura validada por agente às cegas](#20-guia-de-arquitetura-validada-por-agente-às-cegas) | ver abaixo |
 
 ---
 
@@ -585,4 +586,28 @@ TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──
 **O que ficou de fora, de propósito.** O `Track` continua com `isrc: string`: é o contrato JSON do BFF, e convertê-lo em entidade só traria mapeamento sem regra nova. Entidades e agregados não se justificam numa tela de leitura.
 
 **Verificação.** 10 testes do VO (normalização, partes, 6 formatos inválidos, igualdade, imutabilidade); 34 testes unitários no total; o E2E confere a forma de leitura no card (`BX-KZM-19-00338`) e no aviso (`QZ-NJX-20-78148`).
+
+---
+
+## 20. Guia de arquitetura validada por agente às cegas
+
+**Contexto.** Duas perguntas: uma pessoa nova entende a arquitetura? Uma IA tem tudo o que precisa para gerar código dentro das regras? O lint **garantia** as regras, mas o **entendimento** estava espalhado entre o README e esta bitácora, que é cronológica. Além disso, o `AGENTS.md` estava desatualizado: listava as camadas sem `ports/` nem `<feature>.providers.ts`.
+
+**Decisão**
+
+- [`docs/ARQUITETURA.md`](ARQUITETURA.md): o estado **atual**, não a história. Traz o diagrama de dependências, a tabela "onde coloco isto?", a regra de nomes (feature no plural, entidade no singular), os padrões comuns (status de carregamento, derivados no store, `<app-alert>`, quando usar Value Object), a receita de uma feature nova com código que compila e os moldes de teste.
+- `AGENTS.md` atualizado: aponta para a guia antes de qualquer código, lista as camadas corretas e tem uma checklist de conclusão.
+- `LoadStatus` foi para `@shared/models`, para que toda feature use o mesmo padrão.
+- As mensagens do lint ficaram genéricas (não citam mais `TRACKS_STORE`), porque valem para qualquer feature.
+
+**Validação: um agente sem contexto criou uma feature `labels` usando só `AGENTS.md` + a guia**, sem poder abrir `features/tracks/`.
+
+| Rodada | Fronteiras, lint, build | Testes + cobertura | Seguiu os padrões do projeto? |
+|---|---|---|---|
+| 1 (guia inicial) | ✔ de primeira | ✔ de primeira | **Não**: inventou `loading: boolean` + `error: string` em vez de `status`, não criou Value Object nem fixture, usou `<p role="alert">` em vez de `<app-alert>`. Apontou 12 lacunas |
+| 2 (guia corrigida) | ✔ de primeira | ✔ após 2 correções no próprio código | **Sim**: `status: LoadStatus`, VO `CountryCode`, fixture em `src/testing/`, `<app-alert>` com "Tentar de novo", ordenação em `withComputed`. Os trechos da guia compilaram sem alteração |
+
+As falhas da rodada 2 viraram notas na guia: `noUncheckedIndexedAccess` nos testes, a cobertura que conta ramos, substituir o spec gerado pelo CLI, o estado vazio e onde converter para o VO.
+
+**Conclusão para a apresentação.** O lint garante que nada quebra as regras; a rodada 1 mostrou que isso **não basta** para o código sair consistente. Com a guia, o código gerado por IA (ou escrito por quem chega) segue os mesmos padrões do existente. A guia foi tratada como código: escrita, testada e corrigida.
 

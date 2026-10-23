@@ -15,7 +15,7 @@ npm start                 # api/.env a partir de .env.example; SPOTIFY_MODE=mock
 # Frontend — frontend/
 npm ci
 npm run lint:boundaries   # rode antes do lint: prova as fronteiras de arquitetura
-npm run lint
+npm run lint              # = ng lint
 npm run test:coverage     # exige 90% por arquivo em utils/models/store/shared
 npm run build
 npm run e2e               # Playwright: sobe API (mock) + ng serve; precisa de npm ci em api/
@@ -26,12 +26,15 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 
 ## Arquitetura
 
+**Antes de escrever código, leia [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md)**: camadas, tabela "onde coloco isto?" e a receita de uma feature nova com esqueletos.
+
 - `api/`: BFF em Express. É o único lugar com as credenciais do Spotify.
 - `frontend/`: Angular 21 (LTS), standalone, zoneless, signals, SCSS puro.
-- Vertical slice: `frontend/src/app/features/<feature>/{pages,components,store,services,models,utils}` e `shared/`.
-- Fluxo de dados: `pages/components → TRACKS_STORE (porta) → TracksSignalStore → TRACKS_REPOSITORY (porta) → TrackApiService → API`.
-- Estado com **NgRx Signal Store** (`@ngrx/signals`). Injete sempre a **porta** (`ports/`), nunca a classe; o vínculo porta → implementação fica só em `<feature>.providers.ts`.
-- As fronteiras são verificadas pelo ESLint (`frontend/eslint.config.js`). O motivo de cada uma está em `docs/BITACORA.md`.
+- Vertical slice: `frontend/src/app/features/<feature>/{pages,components,ports,store,services,models,utils}` + `<feature>.providers.ts`, e `shared/`.
+- Fluxo: `página → porta do store → Signal Store → porta de dados → *-api.service → /api`.
+- Estado com **NgRx Signal Store** (`@ngrx/signals`). Injete sempre a **porta** (`ports/`, `InjectionToken`), nunca a classe; o vínculo porta → implementação fica só em `<feature>.providers.ts`.
+- Conceito com regra (validação, formato) = Value Object em `models/` (ex.: `isrc.value-object.ts`).
+- As fronteiras são verificadas pelo ESLint (`frontend/eslint.config.js`): se o lint barrar um import, a correção é mudar o código de camada, nunca a regra.
 
 ## Decisões do projeto que diferem do padrão
 
@@ -48,6 +51,12 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 - Adicionar dependências sem pedir.
 - Baixar os limites de cobertura ou pular passos do CI.
 - Editar `frontend/AGENTS.md`: regenere com `npx ng g ai-config --tool=agents`.
+
+## Antes de concluir uma tarefa
+
+- [ ] Teste no nível certo de cada camada alterada (tabela no passo 8 de `docs/ARQUITETURA.md`).
+- [ ] `npm run lint:boundaries && npm run lint && npm run test:coverage && npm run build` em `frontend/`; `npm run test:coverage` em `api/`; `npm run e2e` se a tela mudou.
+- [ ] Decisão nova → seção em `docs/BITACORA.md`; estrutura nova → `docs/ARQUITETURA.md`.
 
 ## Convenções
 
