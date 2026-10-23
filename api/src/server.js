@@ -9,7 +9,7 @@ app.listen(config.port, () => {
   if (staticDir) console.log(`Servindo o frontend de ${staticDir}`);
   if (source.name === 'mock') {
     console.warn(
-      `⚠ Modo MOCK: dados fictícios (cenário: ${config.mock.scenario}). ` +
+      `⚠ Modo MOCK: dados de demonstração (cenário: ${config.mock.scenario}). ` +
         'Para o Spotify real, defina SPOTIFY_MODE=live e as credenciais.',
     );
   }

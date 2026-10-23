@@ -3,9 +3,10 @@
     <div class="title-row">
       <h1>Faixas do contrato</h1>
       @if (store.source() === 'mock') {
-        <app-info-chip label="Demonstração" heading="Dados fictícios" tone="warn">
-          A integração com o Spotify aguarda a configuração da conta Premium. Os ISRCs são os do
-          contrato; títulos, artistas, capas e prévias são simulados pela API.
+        <app-info-chip label="Demonstração" heading="Dados de demonstração" tone="warn">
+          A API está sem credenciais do Spotify e usa uma cópia dos metadados reais destes ISRCs.
+          Capas, prévias e alguns estados (disponibilidade no BR, ISRC não encontrado) são simulados
+          para mostrar todos os casos da tela.
         </app-info-chip>
       }
     </div>

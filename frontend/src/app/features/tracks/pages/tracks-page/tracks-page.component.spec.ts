@@ -89,7 +89,7 @@ describe('TracksPageComponent (integração)', () => {
     expect(http.match(() => true).length).toBe(CONTRACT_ISRCS.length);
   });
 
-  it('avisa que os dados são fictícios quando a API está em modo mock', async () => {
+  it('avisa que os dados são de demonstração quando a API está em modo mock', async () => {
     respondAll((isrc) =>
       http
         .expectOne(`/api/tracks/${isrc}`)

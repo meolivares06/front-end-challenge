@@ -29,7 +29,7 @@ Antes da implementação, a documentação atual da Spotify Web API foi conferid
 | `available_markets` removido em *Development Mode* (fev/2026) | [Guia de migração](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide) | Disponibilidade no BR via busca com `market=BR` + `is_playable`; se a faixa não aparecer no BR, busca sem mercado para distinguir "indisponível" de "não encontrada" |
 | `preview_url` nulo para apps criados após nov/2024 | Comunicado do Spotify | O player funciona quando há URL; sem ela, o botão fica desabilitado e explicado |
 | Endpoint em lote `GET /tracks` removido em *Development Mode* | Guia de migração | Uma busca por ISRC, em paralelo |
-| *Development Mode* exige Premium na conta dona do app | Guia de migração | Modo de demonstração até a conta ser configurada (seção 10) |
+| *Development Mode* exige Premium na conta dona do app | Guia de migração | Modo de demonstração quando não há credenciais (seção 10) |
 | O fluxo *Client Credentials* usa o Client Secret | Documentação de autorização | O segredo fica num servidor intermediário, nunca no navegador (seção 3) |
 
 ---
@@ -197,11 +197,11 @@ Cada camada tem uma lista de imports proibidos (`no-restricted-imports`). Uma vi
 
 ## 10. Modo de demonstração
 
-Enquanto a conta Premium não é configurada, a API usa um cliente simulado **com o mesmo contrato do cliente real** (`findTrackByIsrc`). O serviço, a regra do BR, o mapeamento e o frontend rodam iguais nos dois modos.
+Sem credenciais do Spotify, a API usa um cliente simulado **com o mesmo contrato do cliente real** (`findTrackByIsrc`). O serviço, a regra do BR, o mapeamento e o frontend rodam iguais nos dois modos.
 
 - Troca por variável de ambiente: `SPOTIFY_MODE=mock|live`. Sem credenciais, o padrão é `mock`.
 - **Nunca silencioso:** cabeçalho `X-Data-Source`, campo em `/api/health`, aviso no log e chip na tela.
-- **Catálogo fictício que cobre todos os estados:** disponível no BR (com e sem prévia), `is_playable: false`, ausente no mercado BR, ISRC não encontrado e datas com precisão de ano ou mês. Os ISRCs são os do contrato; títulos e artistas são inventados.
+- **Metadados reais, estados simulados:** título, artistas, álbum, data, duração e ID de cada faixa foram capturados da Spotify Web API. Na captura, as 10 faixas existem, estão disponíveis no BR e vêm sem prévia. Para cobrir todos os estados da tela, alguns são simulados e marcados no catálogo (`simulated`): prévia de áudio, `is_playable: false`, ausência no mercado BR, ISRC não encontrado e datas com precisão de ano ou mês.
 - Capas (SVG) e prévias de áudio (WAV) geradas pela própria API, sem arquivos binários no repositório.
 - `SPOTIFY_MOCK_SCENARIO=down` simula o Spotify fora do ar; `SPOTIFY_MOCK_SCENARIO=partial` faz um único ISRC falhar.
 

@@ -6,7 +6,7 @@ Se a integração cair, a página avisa e oferece **"Tentar de novo"**; se só p
 
 **Demo pública:** https://isrc-spotify-challenge.vercel.app
 
-> Sem credenciais do Spotify, o projeto roda em **modo demonstração** (dados fictícios, com aviso na tela). Veja [Dados reais](#dados-reais-spotify).
+> Sem credenciais do Spotify, o projeto roda em **modo demonstração** (metadados reais dos ISRCs com alguns estados simulados, e aviso na tela). Veja [Dados reais](#dados-reais-spotify).
 
 ---
 
@@ -79,7 +79,7 @@ O mesmo roda no CI a cada push ([`.github/workflows/ci.yml`](.github/workflows/c
 
 ## Dados reais (Spotify)
 
-Desde fevereiro de 2026, apps novas do Spotify em *Development Mode* exigem **Premium** na conta dona da app ([guia oficial](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide)). Por isso o padrão é o modo demonstração. Para usar dados reais, crie `api/.env`:
+Desde fevereiro de 2026, apps novas do Spotify em *Development Mode* exigem **Premium** na conta dona da app ([guia oficial](https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide)). Sem credenciais, o padrão é o modo demonstração. Para usar dados reais, crie `api/.env`:
 
 ```
 SPOTIFY_MODE=live

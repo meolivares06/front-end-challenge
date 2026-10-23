@@ -8,7 +8,7 @@ Como o projeto está organizado **hoje** e como acrescentar código sem quebrar 
 
 ```
 Navegador ──▶ Angular (frontend/) ──/api──▶ BFF Express (api/) ──▶ Spotify Web API
-                                                   └─ modo mock: catálogo fictício
+                                                   └─ modo mock: catálogo de demonstração
 ```
 
 | Peça | Responsabilidade | Não faz |

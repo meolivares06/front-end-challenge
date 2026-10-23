@@ -15,7 +15,7 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 - **Frontend em vertical slices com ports & adapters**: estado em NgRx Signal Store; a página e o store dependem de portas (`InjectionToken`), e só `provideTracksFeature()` conhece as implementações.
 - **Value Object `Isrc`**: normaliza e valida o identificador central do domínio.
 - **Fronteiras verificadas pelo ESLint**, com prova executável (`npm run lint:boundaries`).
-- **Modo de demonstração**: com o mesmo contrato do cliente real, enquanto a conta Spotify não tem Premium (exigência de fev/2026).
+- **Modo de demonstração**: roda sem credenciais, com o mesmo contrato do cliente real e os metadados reais dos ISRCs; alguns estados são simulados para cobrir todos os casos da tela.
 
 O contexto e as alternativas de cada decisão estão em `docs/DECISOES.md`; a estrutura do código, em `docs/ARQUITETURA.md`.
 

@@ -42,7 +42,7 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 - O serviço de requisições termina em `-api.service.ts`. A regra de fronteira depende desse sufixo.
 - Não há rotas: a aplicação é uma página só, então "lazy loading de rotas" não se aplica.
 - Disponibilidade no BR: busca com `market=BR` + `is_playable` (`available_markets` não existe em Dev Mode).
-- Modo mock (`api/src/mock/`): implementa o mesmo contrato do cliente real (`findTrackByIsrc`). Novos cenários entram no catálogo fictício, nunca como `if (mock)` no serviço, na regra ou no frontend.
+- Modo mock (`api/src/mock/`): implementa o mesmo contrato do cliente real (`findTrackByIsrc`). Novos cenários entram no catálogo de demonstração, nunca como `if (mock)` no serviço, na regra ou no frontend.
 
 ## Proibido
 

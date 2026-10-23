@@ -21,7 +21,7 @@ describe('Modo mock', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers['x-data-source']).toBe('mock');
-    expect(res.body).toMatchObject({ title: 'Avenida Paulista, 4h', availableInBrazil: true });
+    expect(res.body).toMatchObject({ title: 'É pra Você', availableInBrazil: true });
   });
 
   it.each([

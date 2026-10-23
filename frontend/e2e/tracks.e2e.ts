@@ -22,8 +22,8 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
     const demo = tracks.chip('Demonstração');
     await expect(demo).toHaveAttribute('aria-expanded', 'false');
     await demo.click();
-    await expect(page.getByRole('note', { name: 'Dados fictícios' })).toContainText(
-      'conta Premium',
+    await expect(page.getByRole('note', { name: 'Dados de demonstração' })).toContainText(
+      'metadados reais',
     );
     await page.keyboard.press('Escape');
     await expect(demo).toHaveAttribute('aria-expanded', 'false');
@@ -44,12 +44,12 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
   });
 
   test('mostra os dados exigidos de cada faixa', async () => {
-    const card = tracks.card('Golden Hour Drive');
+    const card = tracks.card('Sexta Sua Linda');
 
-    await expect(card.getByRole('img', { name: /Capa do álbum Night Shift/ })).toBeVisible();
-    await expect(card).toContainText('Mara Keyes');
-    await expect(card).toContainText('04 de out de 2019');
-    await expect(card).toContainText('03:25');
+    await expect(card.getByRole('img', { name: /Capa do álbum Sexta Sua Linda/ })).toBeVisible();
+    await expect(card).toContainText('DJ Maskot, MC Madan');
+    await expect(card).toContainText('27 de set de 2019');
+    await expect(card).toContainText('03:33');
     await expect(card).toContainText('BX-KZM-19-00338'); // ISRC na forma de leitura (Value Object)
     await expect(card.getByRole('link', { name: /Spotify/ })).toHaveAttribute('target', '_blank');
 
@@ -59,14 +59,14 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
   });
 
   test('sinaliza a disponibilidade no Brasil nos três cenários', async () => {
-    await expect(tracks.card('Golden Hour Drive')).toContainText('Disponível no BR');
-    await expect(tracks.card('Céu de Fevereiro')).toContainText('Indisponível no BR'); // is_playable: false
-    await expect(tracks.card('Nordlys over Fjorden')).toContainText('Indisponível no BR'); // ausente no mercado BR
-    await expect(tracks.card('Maré de Março')).toContainText('2006'); // data com precisão de ano
+    await expect(tracks.card('Sexta Sua Linda')).toContainText('Disponível no BR');
+    await expect(tracks.card('Quase Nua')).toContainText('Indisponível no BR'); // is_playable: false
+    await expect(tracks.card('IRON MAIDEN')).toContainText('Indisponível no BR'); // ausente no mercado BR
+    await expect(tracks.card('Repente')).toContainText('2013'); // data com precisão de ano
   });
 
   test('toca e pausa a prévia de áudio', async () => {
-    const card = tracks.card('Golden Hour Drive');
+    const card = tracks.card('Sexta Sua Linda');
     const play = card.getByRole('button', { name: /prévia/ });
 
     await card.hover();
@@ -84,7 +84,7 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
   });
 
   test('desabilita a prévia quando a faixa não tem áudio', async () => {
-    const button = tracks.card('Zero Gravity').getByRole('button', { name: /não fornecida/ });
+    const button = tracks.card('Louca').getByRole('button', { name: /não fornecida/ });
 
     await expect(button).toBeDisabled();
   });

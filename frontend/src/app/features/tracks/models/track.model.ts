@@ -20,7 +20,7 @@ export interface Track {
 
 export type SortDirection = 'asc' | 'desc';
 
-/** De onde a API tirou os dados: Spotify real ou catálogo fictício (modo mock). */
+/** De onde a API tirou os dados: Spotify real ou catálogo de demonstração (modo mock). */
 export type DataSource = 'spotify' | 'mock';
 
 export interface TracksResult {

@@ -87,16 +87,14 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
 
   it('um novo load cancela a requisição anterior (switchMap)', () => {
     const first = new Subject<TracksResult>();
-    getTracks
-      .mockReturnValueOnce(first)
-      .mockReturnValueOnce(
-        of({
-          tracks: [buildTrack({ title: 'Nova' })],
-          notFound: [],
-          failed: [],
-          source: 'spotify',
-        }),
-      );
+    getTracks.mockReturnValueOnce(first).mockReturnValueOnce(
+      of({
+        tracks: [buildTrack({ title: 'Nova' })],
+        notFound: [],
+        failed: [],
+        source: 'spotify',
+      }),
+    );
 
     store.load();
     store.load();

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { coverSvg, previewWav } from './mock-assets.js';
 import { MOCK_CATALOG } from './mock-catalog.js';
 
-/** Serve as capas e prévias do catálogo fictício. Só é montado no modo mock. */
+/** Serve as capas e prévias do catálogo de demonstração. Só é montado no modo mock. */
 export function createMockAssetsRouter() {
   const router = Router();
   const byIsrc = new Map(MOCK_CATALOG.map((entry) => [entry.isrc, entry]));

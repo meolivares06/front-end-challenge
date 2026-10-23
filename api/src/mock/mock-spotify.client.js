@@ -20,7 +20,7 @@ function toSpotifyTrack(entry, market, assetsBaseUrl) {
     },
     duration_ms: entry.durationMs,
     preview_url: entry.preview ? `${assetsBaseUrl}/previews/${entry.isrc}.wav` : null,
-    external_urls: { spotify: `https://open.spotify.com/search/${encodeURIComponent(entry.title)}` },
+    external_urls: { spotify: `https://open.spotify.com/track/${entry.spotifyId}` },
     ...(market === BRAZIL && { is_playable: entry.inBrazil !== 'not-playable' }),
   };
 }

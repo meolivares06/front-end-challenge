@@ -4,7 +4,7 @@ import { InfoChipComponent } from './info-chip.component';
 
 @Component({
   imports: [InfoChipComponent],
-  template: `<app-info-chip label="Demonstração" heading="Dados fictícios" tone="warn"
+  template: `<app-info-chip label="Demonstração" heading="Dados de demonstração" tone="warn"
       >Explicação</app-info-chip
     >
     <p id="fora">fora</p>`,
