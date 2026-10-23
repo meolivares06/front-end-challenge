@@ -54,10 +54,9 @@ describe('TracksPageComponent (integração)', () => {
   });
 
   it('alerta o usuário quando a integração está indisponível e permite tentar de novo', async () => {
-    // Basta uma falha: o forkJoin cancela as demais requisições.
-    http
-      .expectOne(`/api/tracks/${CONTRACT_ISRCS[0]}`)
-      .flush({}, { status: 503, statusText: 'Unavailable' });
+    respondAll((isrc) =>
+      http.expectOne(`/api/tracks/${isrc}`).flush({}, { status: 503, statusText: 'Unavailable' }),
+    );
     await fixture.whenStable();
 
     const alert = el.querySelector('[role="alert"]');
@@ -66,6 +65,28 @@ describe('TracksPageComponent (integração)', () => {
     (alert?.querySelector('button') as HTMLButtonElement).click();
     await fixture.whenStable();
     expect(http.match(() => true).filter((r) => !r.cancelled).length).toBe(CONTRACT_ISRCS.length);
+  });
+
+  it('com falha parcial, mostra as faixas carregadas e avisa quais não foram consultadas', async () => {
+    respondAll((isrc, i) => {
+      const req = http.expectOne(`/api/tracks/${isrc}`);
+      if (i === 0) req.flush({}, { status: 503, statusText: 'Unavailable' });
+      else req.flush(buildTrack({ isrc, title: `Faixa ${i}` }));
+    });
+    await fixture.whenStable();
+
+    expect(el.querySelectorAll('app-track-card').length).toBe(9);
+    expect(el.querySelector('[role="alert"]')).toBeNull();
+    const warning = el.querySelector('app-alert[role="status"]');
+    expect(warning?.textContent).toContain('Algumas faixas não puderam ser consultadas');
+    expect(warning?.textContent).toMatch(/1\s+de 10 ISRCs/);
+    expect(el.querySelector('app-track-not-found')?.textContent).toContain(
+      'Não foi possível consultar',
+    );
+
+    (warning?.querySelector('button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(http.match(() => true).length).toBe(CONTRACT_ISRCS.length);
   });
 
   it('avisa que os dados são fictícios quando a API está em modo mock', async () => {
@@ -102,6 +123,7 @@ describe('TracksPageComponent (lista vazia)', () => {
       status: signal('ready'),
       tracks: signal([]),
       notFound: signal([]),
+      failed: signal([]),
       direction: signal('asc'),
       source: signal(null),
       total: signal(0),

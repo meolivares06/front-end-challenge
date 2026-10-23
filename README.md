@@ -2,7 +2,7 @@
 
 Página que consulta **10 ISRCs** na Spotify Web API e mostra, **em ordem alfabética por título**:
 capa do álbum, data de lançamento, título, artistas, duração (mm:ss), prévia de áudio, link para o Spotify e se a faixa **está disponível no Brasil**.
-Se a integração cair, a página avisa e oferece **"Tentar de novo"**.
+Se a integração cair, a página avisa e oferece **"Tentar de novo"**; se só parte das consultas falhar, mostra as faixas que chegaram e avisa quais ficaram de fora.
 
 **Demo pública:** https://isrc-spotify-challenge.vercel.app
 

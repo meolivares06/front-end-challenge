@@ -2,7 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { IconComponent } from '@shared/icons/icon.component';
 import type { Isrc } from '../../models/isrc.value-object';
 
-/** Lugar reservado na grade para um ISRC do contrato que o Spotify não encontrou. */
+/**
+ * Lugar reservado na grade para um ISRC do contrato sem faixa exibida:
+ * o Spotify não o encontrou, ou a consulta falhou.
+ */
 @Component({
   selector: 'app-track-not-found',
   imports: [IconComponent],
@@ -10,11 +13,16 @@ import type { Isrc } from '../../models/isrc.value-object';
   host: { class: 'ghost' },
   template: `
     <div class="ghost__art" aria-hidden="true">
-      <app-icon name="search" [size]="28" />
+      <app-icon [name]="reason() === 'failed' ? 'alert' : 'search'" [size]="28" />
     </div>
     <div class="ghost__body">
-      <h2 class="ghost__title">Não encontrada no Spotify</h2>
-      <p class="ghost__text">Nenhuma gravação com este código.</p>
+      @if (reason() === 'failed') {
+        <h2 class="ghost__title">Não foi possível consultar</h2>
+        <p class="ghost__text">O Spotify não respondeu para este código.</p>
+      } @else {
+        <h2 class="ghost__title">Não encontrada no Spotify</h2>
+        <p class="ghost__text">Nenhuma gravação com este código.</p>
+      }
       <p class="ghost__isrc">
         <abbr title="International Standard Recording Code">ISRC</abbr> {{ label() }}
       </p>
@@ -24,6 +32,7 @@ import type { Isrc } from '../../models/isrc.value-object';
 })
 export class TrackNotFoundComponent {
   readonly isrc = input.required<Isrc>();
+  readonly reason = input<'not-found' | 'failed'>('not-found');
 
   protected readonly label = computed(() => this.isrc().format());
 }

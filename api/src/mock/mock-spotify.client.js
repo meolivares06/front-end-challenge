@@ -2,6 +2,8 @@ import { SpotifyUnavailableError } from '../spotify/spotify-error.js';
 import { MOCK_CATALOG } from './mock-catalog.js';
 
 const BRAZIL = 'BR';
+/** No cenário 'partial', só este ISRC falha: o resto da lista responde normalmente. */
+export const PARTIAL_FAILURE_ISRC = 'BRC310600002';
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Converte uma entrada do catálogo no formato do objeto `track` da Spotify Web API. */
@@ -27,7 +29,8 @@ function toSpotifyTrack(entry, market, assetsBaseUrl) {
  * Mesmo contrato do cliente real (`findTrackByIsrc(isrc, market)`), sem rede nem credenciais.
  *
  * @param {object} options
- * @param {'ok' | 'down'} [options.scenario] 'down' simula o Spotify fora do ar.
+ * @param {'ok' | 'down' | 'partial'} [options.scenario] 'down' simula o Spotify fora do ar;
+ *   'partial' simula a falha de um único ISRC (instabilidade, rate limit).
  * @param {number} [options.latencyMs] atraso simulado, para a tela mostrar o carregamento.
  * @param {string} [options.assetsBaseUrl] onde a API serve as capas e prévias simuladas.
  */
@@ -38,6 +41,9 @@ export function createMockSpotifyClient({ scenario = 'ok', latencyMs = 0, assets
     async findTrackByIsrc(isrc, market) {
       if (latencyMs) await sleep(latencyMs / 2 + Math.random() * latencyMs);
       if (scenario === 'down') throw new SpotifyUnavailableError('Spotify simulado fora do ar (SPOTIFY_MOCK_SCENARIO=down)');
+      if (scenario === 'partial' && isrc === PARTIAL_FAILURE_ISRC) {
+        throw new SpotifyUnavailableError('Falha simulada de um ISRC (SPOTIFY_MOCK_SCENARIO=partial)');
+      }
 
       const entry = byIsrc.get(isrc);
       if (!entry) return null;

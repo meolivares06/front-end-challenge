@@ -29,6 +29,7 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
           buildTrack({ isrc: 'A', title: 'Água' }),
         ],
         notFound: [Isrc.create('QZNJX2078148')],
+        failed: [Isrc.create('BRC310600002')],
         source: 'mock',
       }),
     );
@@ -39,6 +40,7 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
     expect(store.tracks().map((t) => t.title)).toEqual(['Água', 'Zebra']);
     expect(store.availableInBrazil()).toBe(1);
     expect(store.notFound().map(String)).toEqual(['QZNJX2078148']);
+    expect(store.failed().map(String)).toEqual(['BRC310600002']);
     expect(store.hasNoPreviews()).toBe(true);
     expect(store.source()).toBe('mock');
   });
@@ -68,6 +70,7 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
           buildTrack({ isrc: 'B', title: 'Zebra' }),
         ],
         notFound: [],
+        failed: [],
         source: 'spotify',
       }),
     );
@@ -87,12 +90,22 @@ describe('TracksSignalStore (via porta TRACKS_STORE)', () => {
     getTracks
       .mockReturnValueOnce(first)
       .mockReturnValueOnce(
-        of({ tracks: [buildTrack({ title: 'Nova' })], notFound: [], source: 'spotify' }),
+        of({
+          tracks: [buildTrack({ title: 'Nova' })],
+          notFound: [],
+          failed: [],
+          source: 'spotify',
+        }),
       );
 
     store.load();
     store.load();
-    first.next({ tracks: [buildTrack({ title: 'Antiga' })], notFound: [], source: 'spotify' });
+    first.next({
+      tracks: [buildTrack({ title: 'Antiga' })],
+      notFound: [],
+      failed: [],
+      source: 'spotify',
+    });
 
     expect(store.tracks().map((t) => t.title)).toEqual(['Nova']);
     expect(first.observed).toBe(false);

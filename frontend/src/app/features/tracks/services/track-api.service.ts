@@ -1,6 +1,6 @@
 import { HttpClient, type HttpErrorResponse, type HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, forkJoin, map, type Observable, of, throwError } from 'rxjs';
+import { catchError, forkJoin, map, type Observable, of } from 'rxjs';
 import type { Isrc } from '../models/isrc.value-object';
 import type { DataSource, Track, TracksResult } from '../models/track.model';
 import type { TracksRepository } from '../ports/tracks-repository.port';
@@ -13,8 +13,11 @@ export class IntegrationUnavailableError extends Error {
   }
 }
 
+type Outcome = 'found' | 'not-found' | 'failed';
+
 interface Lookup {
   isrc: Isrc;
+  outcome: Outcome;
   track: Track | null;
   source: DataSource;
 }
@@ -23,7 +26,7 @@ interface Lookup {
 const readSource = (headers: HttpHeaders): DataSource =>
   headers.get('X-Data-Source') === 'mock' ? 'mock' : 'spotify';
 
-const EMPTY_RESULT: TracksResult = { tracks: [], notFound: [], source: null };
+const EMPTY_RESULT: TracksResult = { tracks: [], notFound: [], failed: [], source: null };
 
 @Injectable({ providedIn: 'root' })
 export class TrackApiService implements TracksRepository {
@@ -31,9 +34,10 @@ export class TrackApiService implements TracksRepository {
   private readonly baseUrl = '/api/tracks';
 
   /**
-   * Uma requisição por ISRC, em paralelo. Um ISRC inexistente (404) vira "não encontrado";
-   * qualquer outra falha significa que a integração está fora e interrompe o carregamento
-   * inteiro, porque o requisito é avisar quando a integração cai, não exibir uma lista parcial.
+   * Uma requisição por ISRC, em paralelo. Cada consulta termina em um de três resultados:
+   * encontrada, não encontrada (404) ou falha (qualquer outro erro). Uma falha isolada não
+   * derruba a lista: as demais faixas são exibidas, com aviso. Só quando todas falham a
+   * integração é considerada indisponível.
    *
    * A agregação fica aqui de propósito, para demonstrar a consulta por ISRC no cliente:
    * o BFF existe pelo segredo do Spotify. Com uma lista dinâmica ou grande, ela migra para
@@ -45,11 +49,19 @@ export class TrackApiService implements TracksRepository {
       return of(EMPTY_RESULT);
     }
     return forkJoin(isrcs.map((isrc) => this.lookup(isrc))).pipe(
-      map((lookups) => ({
-        tracks: lookups.flatMap(({ track }) => (track ? [track] : [])),
-        notFound: lookups.filter(({ track }) => !track).map(({ isrc }) => isrc),
-        source: lookups.some(({ source }) => source === 'mock') ? 'mock' : 'spotify',
-      })),
+      map((lookups) => {
+        if (lookups.every(({ outcome }) => outcome === 'failed')) {
+          throw new IntegrationUnavailableError();
+        }
+        const isrcsWith = (outcome: Outcome) =>
+          lookups.filter((l) => l.outcome === outcome).map(({ isrc }) => isrc);
+        return {
+          tracks: lookups.flatMap(({ track }) => (track ? [track] : [])),
+          notFound: isrcsWith('not-found'),
+          failed: isrcsWith('failed'),
+          source: lookups.some(({ source }) => source === 'mock') ? 'mock' : 'spotify',
+        } satisfies TracksResult;
+      }),
     );
   }
 
@@ -57,11 +69,19 @@ export class TrackApiService implements TracksRepository {
     return this.http
       .get<Track>(`${this.baseUrl}/${encodeURIComponent(isrc.value)}`, { observe: 'response' })
       .pipe(
-        map((response) => ({ isrc, track: response.body, source: readSource(response.headers) })),
+        map((response): Lookup => ({
+          isrc,
+          outcome: 'found',
+          track: response.body,
+          source: readSource(response.headers),
+        })),
         catchError((error: HttpErrorResponse) =>
-          error.status === 404
-            ? of({ isrc, track: null, source: readSource(error.headers) })
-            : throwError(() => new IntegrationUnavailableError()),
+          of<Lookup>({
+            isrc,
+            outcome: error.status === 404 ? 'not-found' : 'failed',
+            track: null,
+            source: readSource(error.headers),
+          }),
         ),
       );
   }

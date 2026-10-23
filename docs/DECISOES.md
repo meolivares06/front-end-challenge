@@ -71,7 +71,9 @@ Antes da implementação, a documentação atual da Spotify Web API foi conferid
 |---|---|---|
 | Origem dos ISRCs | Constante validada no frontend (`CONTRACT_ISRCS`) | Catálogo ou contrato no servidor |
 | Consultas | 10 requisições do navegador, em paralelo | 1 requisição a um endpoint em lote no BFF, com limite de tamanho, deduplicação e controle de concorrência |
-| Falha de integração | Interrompe o carregamento inteiro (o requisito é avisar, não exibir lista parcial) | Mesma regra, decidida no servidor |
+| Falha de integração | Falha isolada: exibe as demais faixas, com aviso. Todas falhando: alerta de integração indisponível | Mesma regra, decidida no servidor |
+
+**Falha parcial em vez de tudo ou nada.** Cada consulta termina em encontrada, não encontrada (404) ou falha (outro erro). Uma falha isolada, típica de instabilidade ou limite de requisições, não esconde as faixas que chegaram: a página as exibe e avisa quais ISRCs ficaram sem resposta. O alerta de integração indisponível fica para quando todas as consultas falham. "Tentar de novo" repete a lista inteira, o que mantém o store simples e evita combinar resultados de cargas diferentes.
 
 A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o serviço responde de imediato sem requisições e a página mostra um estado vazio.
 
@@ -92,7 +94,8 @@ A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o servi
 
 | Mensagem | Tratamento |
 |---|---|
-| Integração indisponível | Única caixa da página (`role="alert"`), com ação de repetir |
+| Integração indisponível (todas as consultas falharam) | Caixa de erro (`role="alert"`), com ação de repetir |
+| Integração instável (parte das consultas falhou) | Caixa de aviso (`role="status"`) acima da grade, com ação de repetir a lista inteira; cada ISRC sem resposta vira cartão "Não foi possível consultar" |
 | Modo de demonstração | Chip ao lado do título; a explicação abre sob demanda |
 | Prévias indisponíveis | Chip no resumo; o botão de cada faixa explica o motivo |
 | ISRC não encontrado | Cartão na própria grade, com o ISRC na forma de leitura; o resumo mostra "9 de 10" |
@@ -200,7 +203,7 @@ Enquanto a conta Premium não é configurada, a API usa um cliente simulado **co
 - **Nunca silencioso:** cabeçalho `X-Data-Source`, campo em `/api/health`, aviso no log e chip na tela.
 - **Catálogo fictício que cobre todos os estados:** disponível no BR (com e sem prévia), `is_playable: false`, ausente no mercado BR, ISRC não encontrado e datas com precisão de ano ou mês. Os ISRCs são os do contrato; títulos e artistas são inventados.
 - Capas (SVG) e prévias de áudio (WAV) geradas pela própria API, sem arquivos binários no repositório.
-- `SPOTIFY_MOCK_SCENARIO=down` simula o Spotify fora do ar.
+- `SPOTIFY_MOCK_SCENARIO=down` simula o Spotify fora do ar; `SPOTIFY_MOCK_SCENARIO=partial` faz um único ISRC falhar.
 
 ---
 

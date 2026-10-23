@@ -21,6 +21,7 @@ interface TracksState {
   status: LoadStatus;
   items: readonly Track[];
   notFound: readonly Isrc[];
+  failed: readonly Isrc[];
   direction: SortDirection;
   source: DataSource | null;
 }
@@ -29,6 +30,7 @@ const initialState: TracksState = {
   status: 'idle',
   items: [],
   notFound: [],
+  failed: [],
   direction: 'asc',
   source: null,
 };
@@ -54,10 +56,16 @@ export const TracksSignalStore = signalStore(
         switchMap(() =>
           repository.getTracks(store.isrcs).pipe(
             tapResponse({
-              next: ({ tracks, notFound, source }) =>
-                patchState(store, { status: 'ready', items: tracks, notFound, source }),
+              next: ({ tracks, notFound, failed, source }) =>
+                patchState(store, { status: 'ready', items: tracks, notFound, failed, source }),
               error: () =>
-                patchState(store, { status: 'error', items: [], notFound: [], source: null }),
+                patchState(store, {
+                  status: 'error',
+                  items: [],
+                  notFound: [],
+                  failed: [],
+                  source: null,
+                }),
             }),
           ),
         ),

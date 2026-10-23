@@ -21,7 +21,9 @@ export const config = {
     apiUrl: 'https://api.spotify.com/v1',
   },
   mock: {
-    scenario: process.env.SPOTIFY_MOCK_SCENARIO === 'down' ? 'down' : 'ok',
+    scenario: ['down', 'partial'].includes(process.env.SPOTIFY_MOCK_SCENARIO ?? '')
+      ? process.env.SPOTIFY_MOCK_SCENARIO
+      : 'ok',
     latencyMs: Number(process.env.SPOTIFY_MOCK_LATENCY_MS ?? 400),
   },
 };

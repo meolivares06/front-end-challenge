@@ -4,7 +4,7 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 
 **Demo:** https://isrc-spotify-challenge.vercel.app
 
-- Alerta com "Tentar de novo" quando a integração está indisponível.
+- Alerta com "Tentar de novo" quando a integração está indisponível; se só parte das consultas falha, as demais faixas aparecem com um aviso.
 - ISRCs não encontrados aparecem como cartão na grade, e o resumo indica quantas faixas foram encontradas.
 - Responsiva, acessível (AXE sem violações) e com animações que respeitam `prefers-reduced-motion`.
 - Nenhum dado é armazenado.
@@ -35,7 +35,7 @@ Sem credenciais, a API sobe em modo de demonstração. Os passos estão no READM
 | Fronteiras e lint (frontend) | `npm run lint:boundaries && npm run lint` |
 | Ponta a ponta, desktop e mobile | `npm run e2e` |
 
-- Integração indisponível: `SPOTIFY_MOCK_SCENARIO=down` em `api/.env`.
+- Integração indisponível: `SPOTIFY_MOCK_SCENARIO=down` em `api/.env`; falha de um único ISRC: `SPOTIFY_MOCK_SCENARIO=partial`.
 - Dados reais: `SPOTIFY_MODE=live` com credenciais (exige Premium na conta dona do app).
 
 O CI (GitHub Actions) roda tudo isso em cada push.

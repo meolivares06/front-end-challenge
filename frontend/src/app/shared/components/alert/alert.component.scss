@@ -15,6 +15,11 @@
   --alert-accent: var(--danger);
 }
 
+:host(.alert--warn) {
+  --alert-bg: var(--warn-surface);
+  --alert-accent: var(--warn);
+}
+
 :host(.alert--info) {
   --alert-bg: var(--surface-2);
   --alert-accent: var(--text-muted);

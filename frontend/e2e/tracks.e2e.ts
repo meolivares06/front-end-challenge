@@ -107,6 +107,31 @@ test.describe('Faixas do contrato (API em modo mock)', () => {
   });
 });
 
+test.describe('Integração instável', () => {
+  test('com uma consulta falhando, mostra as demais faixas e um aviso com nova tentativa', async ({
+    page,
+  }) => {
+    const tracks = new TracksPage(page);
+    await page.route('**/api/tracks/BR1SP1200071', (route) =>
+      route.fulfill({ status: 503, body: '{}' }),
+    );
+
+    await tracks.open();
+    const warning = tracks.alert('Algumas faixas não puderam ser consultadas');
+    await expect(warning).toBeVisible();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await tracks.waitForTracks(8);
+    await expect(
+      tracks.notFoundCards().filter({ hasText: 'Não foi possível consultar' }),
+    ).toContainText('BR-1SP-12-00071');
+
+    await page.unroute('**/api/tracks/BR1SP1200071');
+    await warning.getByRole('button', { name: 'Tentar de novo' }).click();
+    await tracks.waitForTracks();
+    await expect(warning).toHaveCount(0);
+  });
+});
+
 test.describe('Integração indisponível', () => {
   test('alerta o usuário e recupera ao tentar de novo', async ({ page }) => {
     const tracks = new TracksPage(page);

@@ -32,6 +32,7 @@ describe('TrackApiService', () => {
     expect(result).toEqual({
       tracks: [buildTrack({ isrc: 'AAAAA0000001' })],
       notFound: [Isrc.create('AAAAA0000002')],
+      failed: [],
       source: 'spotify',
     });
   });
@@ -41,16 +42,35 @@ describe('TrackApiService', () => {
     service.getTracks([]).subscribe((r) => (result = r));
 
     http.expectNone(() => true);
-    expect(result).toEqual({ tracks: [], notFound: [], source: null });
+    expect(result).toEqual({ tracks: [], notFound: [], failed: [], source: null });
   });
 
-  it('sinaliza integração indisponível em qualquer outro erro', () => {
+  it('mantém as faixas carregadas quando só parte das consultas falha', () => {
+    let result: TracksResult | undefined;
+    service
+      .getTracks([Isrc.create('AAAAA0000001'), Isrc.create('AAAAA0000002')])
+      .subscribe((r) => (result = r));
+
+    http.expectOne('/api/tracks/AAAAA0000001').flush(buildTrack({ isrc: 'AAAAA0000001' }));
+    http
+      .expectOne('/api/tracks/AAAAA0000002')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
+
+    expect(result?.tracks.map((t) => t.isrc)).toEqual(['AAAAA0000001']);
+    expect(result?.failed).toEqual([Isrc.create('AAAAA0000002')]);
+    expect(result?.notFound).toEqual([]);
+  });
+
+  it('sinaliza integração indisponível quando todas as consultas falham', () => {
     let error: unknown;
-    service.getTracks([Isrc.create('AAAAA0000001')]).subscribe({ error: (e) => (error = e) });
+    service
+      .getTracks([Isrc.create('AAAAA0000001'), Isrc.create('AAAAA0000002')])
+      .subscribe({ error: (e) => (error = e) });
 
     http
       .expectOne('/api/tracks/AAAAA0000001')
       .flush({}, { status: 503, statusText: 'Unavailable' });
+    http.expectOne('/api/tracks/AAAAA0000002').error(new ProgressEvent('error'));
 
     expect(error).toBeInstanceOf(IntegrationUnavailableError);
   });

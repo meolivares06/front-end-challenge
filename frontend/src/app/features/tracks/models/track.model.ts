@@ -25,7 +25,10 @@ export type DataSource = 'spotify' | 'mock';
 
 export interface TracksResult {
   readonly tracks: readonly Track[];
+  /** ISRCs que o Spotify não reconhece (404). */
   readonly notFound: readonly Isrc[];
+  /** ISRCs cuja consulta falhou (integração instável); os demais foram carregados. */
+  readonly failed: readonly Isrc[];
   /** `null` quando nenhuma requisição foi feita (lista de ISRCs vazia). */
   readonly source: DataSource | null;
 }

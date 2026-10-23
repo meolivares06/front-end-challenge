@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/create-app.js';
 import { coverSvg, hash, previewWav } from '../src/mock/mock-assets.js';
 import { createMockAssetsRouter } from '../src/mock/mock-assets.routes.js';
-import { createMockSpotifyClient } from '../src/mock/mock-spotify.client.js';
+import { createMockSpotifyClient, PARTIAL_FAILURE_ISRC } from '../src/mock/mock-spotify.client.js';
 import { SpotifyUnavailableError } from '../src/spotify/spotify-error.js';
 import { createTrackService } from '../src/tracks/track.service.js';
 
@@ -47,6 +47,13 @@ describe('Modo mock', () => {
     await expect(createMockSpotifyClient({ scenario: 'down' }).findTrackByIsrc('X')).rejects.toBeInstanceOf(
       SpotifyUnavailableError,
     );
+  });
+
+  it('simula a falha de um único ISRC com o cenário partial', async () => {
+    const app = buildMockApp({ scenario: 'partial' });
+
+    expect((await request(app).get(`/api/tracks/${PARTIAL_FAILURE_ISRC}`)).status).toBe(503);
+    expect((await request(app).get('/api/tracks/BR1SP1200071')).status).toBe(200);
   });
 
   it('aplica a latência simulada', async () => {

@@ -62,6 +62,18 @@
   }
 
   @case ('ready') {
+    @if (store.failed().length) {
+      <app-alert
+        class="partial-alert"
+        tone="warn"
+        heading="Algumas faixas não puderam ser consultadas"
+        actionLabel="Tentar de novo"
+        (action)="retry()"
+      >
+        O Spotify não respondeu para {{ store.failed().length }} de {{ store.isrcs.length }} ISRCs.
+        As demais faixas foram carregadas normalmente.
+      </app-alert>
+    }
     @if (store.total() === 0 && store.notFound().length === 0) {
       <p class="empty-state">Nenhuma faixa para exibir.</p>
     } @else {
@@ -78,6 +90,11 @@
         @for (isrc of store.notFound(); track isrc.value; let i = $index) {
           <li class="grid__item" [style.--i]="store.total() + i">
             <app-track-not-found [isrc]="isrc" />
+          </li>
+        }
+        @for (isrc of store.failed(); track isrc.value; let i = $index) {
+          <li class="grid__item" [style.--i]="store.total() + store.notFound().length + i">
+            <app-track-not-found [isrc]="isrc" reason="failed" />
           </li>
         }
       </ol>

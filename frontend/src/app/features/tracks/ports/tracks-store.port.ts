@@ -12,6 +12,7 @@ export interface TracksStorePort {
   readonly status: Signal<LoadStatus>;
   readonly tracks: Signal<readonly Track[]>;
   readonly notFound: Signal<readonly Isrc[]>;
+  readonly failed: Signal<readonly Isrc[]>;
   readonly direction: Signal<SortDirection>;
   readonly source: Signal<DataSource | null>;
   readonly total: Signal<number>;
