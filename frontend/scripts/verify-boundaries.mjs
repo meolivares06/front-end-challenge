@@ -17,6 +17,21 @@ const cases = [
     code: "import { HttpClient } from '@angular/common/http';",
   },
   {
+    name: 'página injeta a porta, não a implementação do store (DIP)',
+    file: 'src/app/features/tracks/pages/tracks-page/x.ts',
+    code: "import { TracksSignalStore } from '../../store/tracks.store';",
+  },
+  {
+    name: 'store depende da porta de dados, não do serviço HTTP (DIP)',
+    file: 'src/app/features/tracks/store/x.ts',
+    code: "import { TrackApiService } from '../services/track-api.service';",
+  },
+  {
+    name: 'portas não conhecem implementações',
+    file: 'src/app/features/tracks/ports/x.ts',
+    code: "import { TracksSignalStore } from '../store/tracks.store';",
+  },
+  {
     name: 'store não depende de componentes',
     file: 'src/app/features/tracks/store/x.ts',
     code: "import { TrackCardComponent } from '../components/track-card/track-card.component';",
@@ -45,9 +60,12 @@ const cases = [
 
 let failures = 0;
 for (const { name, file, code } of cases) {
-  const [result] = await eslint.lintText(`${code}\nexport const used = [${code.match(/\{ (\w+) \}/)[1]}];\n`, {
-    filePath: file,
-  });
+  const [result] = await eslint.lintText(
+    `${code}\nexport const used = [${code.match(/\{ (\w+) \}/)[1]}];\n`,
+    {
+      filePath: file,
+    },
+  );
   const blocked = result.messages.some((m) => m.ruleId === 'no-restricted-imports');
   console.log(`${blocked ? '✔ bloqueado' : '✘ PERMITIDO'}  ${name}`);
   if (!blocked) failures++;
