@@ -4,7 +4,7 @@ Página pública em Angular 21 (LTS) que consulta os 10 ISRCs do contrato na Spo
 
 - `api/`: BFF mínimo em Express que protege o Client Secret (fluxo Client Credentials com cache de token).
 - `frontend/`: vertical slice `features/tracks` + `shared`; standalone components, signals e zoneless.
-- Separação de responsabilidades: `TracksStore` (estado e ações) → `TrackApiService` (requisições). A página só conversa com o store.
+- Estado com **NgRx Signal Store** e inversão de dependência por `InjectionToken`: a página injeta `TRACKS_STORE`, o store injeta `TRACKS_REPOSITORY`; só `provideTracksFeature()` conhece as implementações, e o lint impede o atalho.
 - Alerta com "Tentar de novo" quando a integração está indisponível; aviso separado para ISRCs não encontrados.
 - Responsiva (grade → lista no celular) com transições que respeitam `prefers-reduced-motion`.
 

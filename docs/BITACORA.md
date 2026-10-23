@@ -20,7 +20,8 @@ Registro cronológico de como o projeto foi construído: o contexto de cada etap
 | 14 | [Governança de IA](#14-governança-de-ia) | `a8b3b53` `b57a108` `9cc2218` |
 | 15 | [Skills do Angular e convenção de nomes](#15-skills-do-angular-e-convenção-de-nomes) | `ea2540e` `9d5a95b` |
 | 16 | [Modo mock até a conta Premium](#16-modo-mock-até-a-conta-premium) | `338516b` `3ef5b09` `678fc3c` |
-| 17 | [Testes E2E](#17-testes-e2e) | ver abaixo |
+| 17 | [Testes E2E](#17-testes-e2e) | ver no histórico |
+| 18 | [NgRx Signal Store e inversão de dependência](#18-ngrx-signal-store-e-inversão-de-dependência) | `26170bb` `01efbb2` |
 
 ---
 
@@ -514,4 +515,50 @@ Chromium ──▶ ng serve (proxy /api) ──▶ API em modo mock ──▶ ca
 **Estabilidade.** 18/18 em três execuções seguidas, duas delas com `CI=1` (servidores novos a cada vez, sem reaproveitar).
 
 **No CI.** Job `e2e` com `needs: [frontend, api]`: só roda se as verificações rápidas passarem, porque é o passo mais caro. Instala o Chromium com `playwright install --with-deps`. Em caso de falha, publica o relatório HTML, os traces e as screenshots como artefato (7 dias). No CI há 1 retry e `forbidOnly`, para um `test.only` esquecido não passar.
+
+---
+
+## 18. NgRx Signal Store e inversão de dependência
+
+**Contexto.** O `TracksStore` era um serviço com signals próprios, e a página o injetava **pela classe**, o mesmo valendo para o store com o `TrackApiService`. Isso viola o **D** do SOLID: quem consome dependia da implementação concreta.
+
+**Decisões**
+
+1. **NgRx Signal Store** (`@ngrx/signals` 21, compatível com Angular 21):
+   - `withState` para o estado: `status`, `items`, `notFound`, `direction`, `source`.
+   - `withComputed` para os derivados: faixas ordenadas, total, disponíveis no BR, sem prévias.
+   - `withMethods` para as ações. O `load()` virou `rxMethod` com `switchMap`: um novo load **cancela** o anterior, coisa que antes era feita à mão com `unsubscribe`. Os erros são tratados com `tapResponse`.
+   - O estado só muda por `patchState`, dentro das ações.
+2. **Portas como `InjectionToken`** em `features/tracks/ports/`:
+
+| Porta | Quem injeta | Implementação |
+|---|---|---|
+| `TRACKS_STORE` (`TracksStorePort`) | página / componentes | `TracksSignalStore` |
+| `TRACKS_REPOSITORY` (`TracksRepository`) | store | `TrackApiService` |
+
+3. **Raiz de composição** `tracks.providers.ts` → `provideTracksFeature()`. É o **único** arquivo que importa as implementações:
+   - `TRACKS_STORE` usa `useFactory` tipado (`(): TracksStorePort => inject(TracksSignalStore)`), então o **compilador** garante que a implementação cumpre a porta;
+   - `TRACKS_REPOSITORY` usa `useExisting: TrackApiService`.
+4. **O lint impede o atalho:**
+   - páginas e componentes não podem importar `store/`;
+   - o store não pode importar `*-api.service` nem `HttpClient`;
+   - as portas não podem importar nenhuma implementação.
+
+   `lint:boundaries` passou de 7 para **10** fronteiras provadas.
+
+```
+TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──inject(TRACKS_REPOSITORY)──▶ TrackApiService
+        └── providers: provideTracksFeature()   ← único lugar que conhece as classes
+```
+
+**Por que `InjectionToken` e não a classe abstrata como token.** Uma interface TypeScript some em tempo de execução e não pode ser token. Uma classe abstrata poderia, mas obrigaria a implementação a herdar dela. O `InjectionToken<Interface>` mantém o contrato como tipo puro, e o NgRx Signal Store (uma classe gerada por `signalStore()`) o cumpre por estrutura, sem herança.
+
+**Por que o provider fica na página, e não em `app.config`.** O estado é da tela: nasce e morre com ela. Por isso a página declara `providers: [provideTracksFeature()]`, mas depende só da função de composição e da porta, nunca das classes.
+
+**Verificação**
+
+- O store é testado **pela porta**: o teste usa a mesma `provideTracksFeature()` da aplicação e troca só `TRACKS_REPOSITORY` por um dublê. Há um caso novo: um segundo `load()` cancela o primeiro.
+- O teste de integração da página e os 18 E2E passaram **sem alteração**, o que mostra que o comportamento foi preservado.
+- O limite de cobertura apontou um ramo sem teste (voltar de Z–A para A–Z), e o caso foi incluído.
+- Bundle: de 55 para 59 kB transferidos (+4 kB do NgRx).
 

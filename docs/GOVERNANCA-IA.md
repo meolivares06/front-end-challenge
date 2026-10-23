@@ -63,14 +63,14 @@ Com as regras oficiais em mãos, o código foi conferido item a item:
 | `host` em vez de `@HostBinding`/`@HostListener` | ✔ | `host: {...}` nos componentes |
 | `input()` / `output()` / `computed()` | ✔ | Todos os componentes |
 | `OnPush` em todos os componentes | ✔ | 7 de 7 |
-| Signals para estado, `set`/`update` (sem `mutate`) | ✔ | `TracksStore`, `AudioPreviewService` |
+| Signals para estado, `set`/`update` (sem `mutate`) | ✔ | `TracksSignalStore` (`patchState`), `AudioPreviewService` |
 | Control flow nativo (`@if`, `@for`, `@switch`) | ✔ | Templates |
 | Sem `ngClass`/`ngStyle` | ✔ | Bindings `[class.x]` e `[style.x]` |
 | `inject()` em vez de construtor | ✔ | Serviços e store |
 | Não assumir globais | ✔ | `Audio` e `document` protegidos em `AudioPreviewService` e `withViewTransition` |
 | **`NgOptimizedImage`** | ✘ → ✔ | **Corrigido:** capas com `ngSrc` + `preconnect` para `i.scdn.co` |
 | **Passar em todas as checagens AXE** | ✘ → ✔ | **Corrigido:** o AXE apontou `label-content-name-mismatch` (WCAG 2.5.3) no botão de ordenação |
-| `providedIn: 'root'` para singletons | Exceção consciente | `TracksStore` é provido na página, para o estado viver com a tela (documentado no `AGENTS.md`) |
+| `providedIn: 'root'` para singletons | Exceção consciente | `TracksSignalStore` é provido na página (via `provideTracksFeature()`), para o estado viver com a tela (documentado no `AGENTS.md`) |
 | Lazy loading de rotas | Não se aplica | A aplicação não tem rotas |
 
 **AXE.** Rodado com `axe-core` nas regras WCAG 2.0/2.1 A e AA + best-practice, em desktop e mobile, nos estados de sucesso e de erro. Resultado final: **0 violações** (40 regras aprovadas no estado de sucesso, 25 no de erro).

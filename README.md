@@ -41,7 +41,9 @@ src/app/
 │   ├── models/               # Track, SortDirection
 │   ├── pages/tracks-page/    # apresentação: lê o store e repassa ações
 │   ├── services/             # TrackApiService (só requisições HTTP), AudioPreviewService
-│   ├── store/                # TracksStore: estado (signals) e ações da feature
+│   ├── ports/                # contratos: TRACKS_STORE e TRACKS_REPOSITORY (InjectionToken)
+│   ├── store/                # TracksSignalStore (NgRx Signal Store): implementa TRACKS_STORE
+│   └── tracks.providers.ts   # provideTracksFeature(): liga portas → implementações
 │   └── utils/                # lista de ISRCs, ordenação, formatação de data
 └── shared/                   # reutilizável entre features
     ├── components/alert/
@@ -53,12 +55,14 @@ src/app/
 Fluxo de dados (cada peça com uma responsabilidade):
 
 ```
-TracksPageComponent ──lê signals / chama ações──▶ TracksStore ──▶ TrackApiService ──HTTP──▶ API
+TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──inject(TRACKS_REPOSITORY)──▶ TrackApiService ──HTTP──▶ API
+                     (porta)                                       (porta)
 ```
 
 - **TrackApiService:** só sabe fazer requisições e traduzir erros HTTP (`404` → não encontrada, resto → integração indisponível).
-- **TracksStore:** guarda o estado (`state`, faixas, ISRCs não encontrados, direção da ordenação), expõe tudo como *signals* somente leitura e oferece as ações `load()` e `toggleDirection()`. É provido na própria página (`providers: [TracksStore]`), então o estado vive e morre com ela.
-- **Componentes:** não conhecem HTTP; o componente de página depende só do store.
+- **TracksSignalStore** (NgRx Signal Store): guarda o estado (`status`, faixas, ISRCs não encontrados, direção, origem dos dados), expõe signals somente leitura e as ações `load()` (via `rxMethod` + `switchMap`: um novo load cancela o anterior) e `toggleDirection()`.
+- **Inversão de dependência:** a página injeta a porta `TRACKS_STORE` e o store injeta a porta `TRACKS_REPOSITORY`, ambas `InjectionToken`. Só `provideTracksFeature()` conhece as implementações. Ela é provida na página, então o estado vive e morre com a tela, e o ESLint impede importar implementações fora dela.
+- **Componentes:** não conhecem HTTP nem a implementação do store; dependem só da porta.
 
 Aliases no `tsconfig.json`: `@shared/*`, `@features/*` e `@testing/*` para imports entre fronteiras. Dentro da mesma feature os imports seguem relativos.
 

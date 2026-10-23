@@ -29,12 +29,13 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 - `api/`: BFF em Express. É o único lugar com as credenciais do Spotify.
 - `frontend/`: Angular 21 (LTS), standalone, zoneless, signals, SCSS puro.
 - Vertical slice: `frontend/src/app/features/<feature>/{pages,components,store,services,models,utils}` e `shared/`.
-- Fluxo de dados: `pages/components → store → services → API`. Componentes não conhecem HTTP.
+- Fluxo de dados: `pages/components → TRACKS_STORE (porta) → TracksSignalStore → TRACKS_REPOSITORY (porta) → TrackApiService → API`.
+- Estado com **NgRx Signal Store** (`@ngrx/signals`). Injete sempre a **porta** (`ports/`), nunca a classe; o vínculo porta → implementação fica só em `<feature>.providers.ts`.
 - As fronteiras são verificadas pelo ESLint (`frontend/eslint.config.js`). O motivo de cada uma está em `docs/BITACORA.md`.
 
 ## Decisões do projeto que diferem do padrão
 
-- O store da feature é provido na página (`providers: [TracksStore]`), **não** com `providedIn: 'root'`: o estado vive e morre com a tela.
+- O store da feature é provido na página (`providers: [provideTracksFeature()]`), **não** com `providedIn: 'root'`: o estado vive e morre com a tela.
 - O serviço de requisições termina em `-api.service.ts`. A regra de fronteira depende desse sufixo.
 - Não há rotas: a aplicação é uma página só, então "lazy loading de rotas" não se aplica.
 - Disponibilidade no BR: busca com `market=BR` + `is_playable` (`available_markets` não existe em Dev Mode).
