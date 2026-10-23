@@ -232,7 +232,7 @@ export class ArtistApiService implements ArtistsRepository {
 ```ts
 import { computed, inject } from '@angular/core';
 import { tapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { LoadStatus } from '@shared/models/load-status';
 import { pipe, switchMap, tap } from 'rxjs';
@@ -266,6 +266,8 @@ export const ArtistsSignalStore = signalStore(
       ),
     ),
   })),
+  // Carrega ao nascer: provido na página, o store vive e morre com a tela.
+  withHooks({ onInit: (store) => store.load() }),
 );
 ```
 
@@ -291,7 +293,7 @@ export function provideArtistsFeature(): Provider[] {
 **Passo 7. Página** (`pages/artists-page/`):
 
 ```ts
-import { ChangeDetectionStrategy, Component, inject, type OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AlertComponent } from '@shared/components/alert/alert.component';
 import { provideArtistsFeature } from '../../artists.providers';
 import { ARTISTS_STORE } from '../../ports/artists-store.port';
@@ -303,12 +305,8 @@ import { ARTISTS_STORE } from '../../ports/artists-store.port';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './artists-page.component.html',
 })
-export class ArtistsPageComponent implements OnInit {
+export class ArtistsPageComponent {
   protected readonly store = inject(ARTISTS_STORE);
-
-  ngOnInit(): void {
-    this.store.load();
-  }
 
   protected retry(): void {
     this.store.load();
@@ -336,7 +334,7 @@ export class ArtistsPageComponent implements OnInit {
 }
 ```
 
-O estado `idle` (antes do primeiro `load()`) não renderiza nada de propósito: o `ngOnInit` já dispara o carregamento.
+A página não decide quando carregar: o `withHooks` do store dispara o `load()` ao ser criado, junto com a página. O estado `idle` (antes desse primeiro `load()`) não renderiza nada de propósito. Sem rotas, não há resolver: ele também bloquearia a pintura até os dados chegarem, sem esqueletos de carregamento.
 
 **Passo 8. Montagem.** Hoje `app.component.ts` monta uma única página, sem router. Com uma segunda tela, introduza o router com rotas *lazy* (`loadComponent`) e monte cada página na sua rota.
 
