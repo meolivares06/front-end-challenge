@@ -1,8 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
 import { buildTrack } from '@testing/track.fixture';
+import { TRACKS_STORE, type TracksStorePort } from '../../ports/tracks-store.port';
 import { CONTRACT_ISRCS } from '../../utils/contract-isrcs';
 import { TracksPageComponent } from './tracks-page.component';
 
@@ -90,5 +91,37 @@ describe('TracksPageComponent (integração)', () => {
     await fixture.whenStable();
 
     expect(el.textContent).not.toContain('Demonstração');
+  });
+});
+
+/** Estado vazio: a página recebe um store falso pela porta, sem HTTP. */
+describe('TracksPageComponent (lista vazia)', () => {
+  it('mostra um estado vazio quando não há ISRCs para consultar', async () => {
+    const emptyStore: TracksStorePort = {
+      isrcs: [],
+      status: signal('ready'),
+      tracks: signal([]),
+      notFound: signal([]),
+      direction: signal('asc'),
+      source: signal(null),
+      total: signal(0),
+      availableInBrazil: signal(0),
+      hasNoPreviews: signal(false),
+      load: () => undefined,
+      toggleDirection: () => undefined,
+    };
+    TestBed.configureTestingModule({
+      imports: [TracksPageComponent],
+      providers: [provideZonelessChangeDetection()],
+    }).overrideComponent(TracksPageComponent, {
+      set: { providers: [{ provide: TRACKS_STORE, useValue: emptyStore }] },
+    });
+    const fixture = TestBed.createComponent(TracksPageComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.empty-state')?.textContent).toContain('Nenhuma faixa para exibir');
+    expect(el.querySelector('.grid')).toBeNull();
+    expect(el.querySelector('.toolbar')).toBeNull();
   });
 });

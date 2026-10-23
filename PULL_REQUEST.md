@@ -42,6 +42,6 @@ O CI (GitHub Actions) roda tudo isso em cada push.
 
 ## Próximos passos
 
-- Cache na API se a lista de ISRCs crescer.
+- Endpoint em lote no BFF, com cache, quando a lista de ISRCs deixar de ser fixa (hoje o frontend faz uma consulta por ISRC, por demonstração).
 - Migrar as fronteiras para o Sheriff quando houver uma segunda feature.
 - Hooks de Git (Husky + lint-staged + commitlint) como verificação local, complementando o CI.

@@ -65,6 +65,16 @@ Antes da implementação, a documentação atual da Spotify Web API foi conferid
 - **Injeção por fábrica** (`createTokenService(config, fetchFn)`): os testes trocam só o `fetch`, sem bibliotecas de mock.
 - **Em produção, um processo só:** a API também serve o build do Angular (mesma origem, sem CORS).
 
+**Escopo do BFF: segurança, não agregação.** O BFF nasceu para proteger o segredo do Spotify. Por isso expõe uma faixa por requisição (`GET /api/tracks/:isrc`), e o frontend faz as 10 consultas em paralelo e monta o resultado. É uma escolha de demonstração, adequada a uma lista fixa e pequena:
+
+| Aspecto | Hoje | Com uma lista dinâmica ou grande |
+|---|---|---|
+| Origem dos ISRCs | Constante validada no frontend (`CONTRACT_ISRCS`) | Catálogo ou contrato no servidor |
+| Consultas | 10 requisições do navegador, em paralelo | 1 requisição a um endpoint em lote no BFF, com limite de tamanho, deduplicação e controle de concorrência |
+| Falha de integração | Interrompe o carregamento inteiro (o requisito é avisar, não exibir lista parcial) | Mesma regra, decidida no servidor |
+
+A lista vazia já é tratada: `forkJoin([])` completa sem emitir, então o serviço responde de imediato sem requisições e a página mostra um estado vazio.
+
 ---
 
 ## 4. Requisitos de tela e estados

@@ -26,5 +26,6 @@ export type DataSource = 'spotify' | 'mock';
 export interface TracksResult {
   readonly tracks: readonly Track[];
   readonly notFound: readonly Isrc[];
-  readonly source: DataSource;
+  /** `null` quando nenhuma requisição foi feita (lista de ISRCs vazia). */
+  readonly source: DataSource | null;
 }

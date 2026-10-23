@@ -97,3 +97,9 @@ code {
     filter: blur(4px);
   }
 }
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}

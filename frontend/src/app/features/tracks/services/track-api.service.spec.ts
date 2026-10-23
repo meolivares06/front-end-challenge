@@ -36,6 +36,14 @@ describe('TrackApiService', () => {
     });
   });
 
+  it('com a lista vazia, responde sem requisições em vez de nunca emitir', () => {
+    let result: unknown;
+    service.getTracks([]).subscribe((r) => (result = r));
+
+    http.expectNone(() => true);
+    expect(result).toEqual({ tracks: [], notFound: [], source: null });
+  });
+
   it('sinaliza integração indisponível em qualquer outro erro', () => {
     let error: unknown;
     service.getTracks([Isrc.create('AAAAA0000001')]).subscribe({ error: (e) => (error = e) });

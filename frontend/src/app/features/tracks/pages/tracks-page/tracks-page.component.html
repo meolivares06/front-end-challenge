@@ -62,17 +62,25 @@
   }
 
   @case ('ready') {
-    <ol class="grid" role="list">
-      @for (track of store.tracks(); track track.isrc; let i = $index) {
-        <li class="grid__item" [style.--i]="i" [style.view-transition-name]="'track-' + track.isrc">
-          <app-track-card [track]="track" />
-        </li>
-      }
-      @for (isrc of store.notFound(); track isrc.value; let i = $index) {
-        <li class="grid__item" [style.--i]="store.total() + i">
-          <app-track-not-found [isrc]="isrc" />
-        </li>
-      }
-    </ol>
+    @if (store.total() === 0 && store.notFound().length === 0) {
+      <p class="empty-state">Nenhuma faixa para exibir.</p>
+    } @else {
+      <ol class="grid" role="list">
+        @for (track of store.tracks(); track track.isrc; let i = $index) {
+          <li
+            class="grid__item"
+            [style.--i]="i"
+            [style.view-transition-name]="'track-' + track.isrc"
+          >
+            <app-track-card [track]="track" />
+          </li>
+        }
+        @for (isrc of store.notFound(); track isrc.value; let i = $index) {
+          <li class="grid__item" [style.--i]="store.total() + i">
+            <app-track-not-found [isrc]="isrc" />
+          </li>
+        }
+      </ol>
+    }
   }
 }

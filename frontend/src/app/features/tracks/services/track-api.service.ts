@@ -23,16 +23,27 @@ interface Lookup {
 const readSource = (headers: HttpHeaders): DataSource =>
   headers.get('X-Data-Source') === 'mock' ? 'mock' : 'spotify';
 
+const EMPTY_RESULT: TracksResult = { tracks: [], notFound: [], source: null };
+
 @Injectable({ providedIn: 'root' })
 export class TrackApiService implements TracksRepository {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/api/tracks';
 
   /**
-   * Busca todos os ISRCs em paralelo. Um ISRC inexistente (404) vira "não encontrado";
-   * qualquer outra falha significa que a integração está fora e interrompe o carregamento.
+   * Uma requisição por ISRC, em paralelo. Um ISRC inexistente (404) vira "não encontrado";
+   * qualquer outra falha significa que a integração está fora e interrompe o carregamento
+   * inteiro, porque o requisito é avisar quando a integração cai, não exibir uma lista parcial.
+   *
+   * A agregação fica aqui de propósito, para demonstrar a consulta por ISRC no cliente:
+   * o BFF existe pelo segredo do Spotify. Com uma lista dinâmica ou grande, ela migra para
+   * um endpoint em lote no BFF (ver docs/DECISOES.md, seção 3).
    */
   getTracks(isrcs: readonly Isrc[]): Observable<TracksResult> {
+    // forkJoin([]) completa sem emitir: sem esta guarda, o store ficaria em 'loading' para sempre.
+    if (isrcs.length === 0) {
+      return of(EMPTY_RESULT);
+    }
     return forkJoin(isrcs.map((isrc) => this.lookup(isrc))).pipe(
       map((lookups) => ({
         tracks: lookups.flatMap(({ track }) => (track ? [track] : [])),
