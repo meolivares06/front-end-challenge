@@ -65,6 +65,7 @@ O mesmo roda no CI a cada push ([`.github/workflows/ci.yml`](.github/workflows/c
 
 - **`frontend/`:** Angular 21 (LTS), com uma pasta por funcionalidade e estado em NgRx Signal Store.
 - **`api/`:** um servidor intermediário (BFF) em Express. Guarda o segredo do Spotify, que nunca vai para o navegador.
+- **Arquitetura:** vertical slices com ports & adapters; os princípios SOLID são verificados por lint e testes ([como, princípio a princípio](docs/ARQUITETURA.md#3-princípios-solid-e-camadas)).
 - **Regras de arquitetura:** o ESLint barra imports entre camadas que não devem se conhecer.
 
 ## Documentação de apoio

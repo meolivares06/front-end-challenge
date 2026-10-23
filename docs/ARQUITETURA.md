@@ -74,7 +74,33 @@ TracksPageComponent ──inject(TRACKS_STORE)──▶ TracksSignalStore ──
 
 ---
 
-## 3. Onde coloco isto?
+## 3. Princípios: SOLID e camadas
+
+**Estilo:** *vertical slices* (uma pasta por funcionalidade) com **ports & adapters** dentro de cada uma. Cada princípio abaixo aponta para onde está no código e como é verificado.
+
+| Princípio | Onde está | Como é verificado |
+|---|---|---|
+| **S** — responsabilidade única | Página = apresentação · Signal Store = estado · `*-api.service` = HTTP · `utils/` e `models/` = regras puras | ESLint: cada camada é proibida de importar as outras |
+| **O** — aberto/fechado | Trocar o Spotify real pelo mock **não altera** o serviço, a regra do BR nem o frontend: entra outra implementação do mesmo cliente | `SPOTIFY_MODE=mock\|live` |
+| **L** — substituição de Liskov | O cliente mock substitui o real com o mesmo contrato (`findTrackByIsrc`); o Signal Store cumpre a interface `TracksStorePort` | Os testes do mock passam pelo mesmo serviço; o compilador confere a interface (`useFactory` tipado) |
+| **I** — segregação de interfaces | Interfaces mínimas: a de dados tem um método; a do store expõe só o que a página usa | Revisão de código |
+| **D** — inversão de dependência | A página depende de `TRACKS_STORE` e o store de `TRACKS_REPOSITORY` (`InjectionToken`); só `provideTracksFeature()` conhece as classes | ESLint + `npm run lint:boundaries` |
+
+**Equivalência com as camadas clássicas** (os nomes das pastas mudam, as responsabilidades não):
+
+| Camada clássica | Aqui |
+|---|---|
+| Domínio | `models/` (inclui o Value Object `Isrc`) e `utils/`: TypeScript puro, sem Angular nem RxJS |
+| Aplicação | `store/` |
+| Portas | `ports/` |
+| Infraestrutura (adaptadores) | `services/` e o BFF `api/` |
+| Apresentação | `pages/` e `components/` |
+
+**Sobre DDD:** usamos apenas o que o problema pede: um **Value Object** para o ISRC, a regra de negócio como função pura e o BFF como camada que traduz o modelo do Spotify para o nosso. Por ser uma tela de leitura, não há entidades com comportamento nem agregados.
+
+---
+
+## 4. Onde coloco isto?
 
 ### Nomes: feature no plural, entidade no singular
 
@@ -129,7 +155,7 @@ O exemplo completo é `features/tracks/models/isrc.value-object.ts`. O VO vale *
 
 ---
 
-## 4. Receita: criar uma feature nova
+## 5. Receita: criar uma feature nova
 
 Exemplo com a feature `artists` (entidade `Artist`). Troque pelos seus nomes, seguindo a regra plural/singular acima.
 
@@ -143,7 +169,7 @@ npx ng g c features/artists/pages/artists-page   # gera .ts, .html, .scss e .spe
 npx ng g s features/artists/services/artist-api   # gera artist-api.service.ts e o .spec.ts
 ```
 
-Apague o `.scss` se a tela não tiver estilo próprio, e tire `styleUrl` do componente. Os `.spec.ts` gerados só testam "should create": **substitua-os** pelos moldes da seção 5. Os demais arquivos (modelo, portas, store, providers) são criados à mão.
+Apague o `.scss` se a tela não tiver estilo próprio, e tire `styleUrl` do componente. Os `.spec.ts` gerados só testam "should create": **substitua-os** pelos moldes da seção 6. Os demais arquivos (modelo, portas, store, providers) são criados à mão.
 
 **Passo 2. Modelo** (`models/artist.model.ts`):
 
@@ -314,7 +340,7 @@ O estado `idle` (antes do primeiro `load()`) não renderiza nada de propósito: 
 
 **Passo 8. Montagem.** Hoje `app.component.ts` monta uma única página, sem router. Com uma segunda tela, introduza o router com rotas *lazy* (`loadComponent`) e monte cada página na sua rota.
 
-**Passo 9. Testes** (seção 5) e **verificação** com a mesma sequência do CI:
+**Passo 9. Testes** (seção 6) e **verificação** com a mesma sequência do CI:
 
 ```bash
 npm run lint:boundaries && npm run lint && npm run test:coverage && npm run build && npm run e2e
@@ -322,7 +348,7 @@ npm run lint:boundaries && npm run lint && npm run test:coverage && npm run buil
 
 ---
 
-## 5. Testes
+## 6. Testes
 
 **Ferramenta:** Vitest pelo builder do Angular (`ng test`). `describe`, `it`, `expect` e `vi` são **globais** (sem import). Os testes ficam ao lado do arquivo (`*.spec.ts`); os E2E ficam em `frontend/e2e/*.e2e.ts` (Playwright).
 
@@ -402,7 +428,7 @@ export function buildArtist(overrides: Partial<Artist> = {}): Artist {
 
 ---
 
-## 6. Convenções rápidas
+## 7. Convenções rápidas
 
 - **Angular 21 (LTS):** standalone, zoneless, signals, `input()`/`output()`, control flow `@if`/`@for`, `OnPush`. Não use APIs da v22 (`@Service()`, Signal Forms).
 - **Sufixos:** `*.component.ts`, `*.service.ts`, `*.pipe.ts`, `*.store.ts`, `*.port.ts`, `*.value-object.ts`, `*.model.ts`, `*.fixture.ts`.
@@ -411,7 +437,7 @@ export function buildArtist(overrides: Partial<Artist> = {}): Artist {
 - **Commits:** Conventional Commits (`feat(frontend): …`).
 - **Decisão nova** → uma seção na [bitácora](BITACORA.md); **estrutura nova** → esta guia; **regra nova** → `AGENTS.md` e, se der, uma regra no ESLint.
 
-## 7. API (BFF)
+## 8. API (BFF)
 
 | Pasta | Responsabilidade |
 |---|---|

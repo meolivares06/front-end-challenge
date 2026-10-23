@@ -54,7 +54,7 @@ Antes de concluir qualquer mudança, rode a mesma sequência do CI (`.github/wor
 
 ## Antes de concluir uma tarefa
 
-- [ ] Teste no nível certo de cada camada alterada (tabela no passo 8 de `docs/ARQUITETURA.md`).
+- [ ] Teste no nível certo de cada camada alterada (seção 6 de `docs/ARQUITETURA.md`).
 - [ ] `npm run lint:boundaries && npm run lint && npm run test:coverage && npm run build` em `frontend/`; `npm run test:coverage` em `api/`; `npm run e2e` se a tela mudou.
 - [ ] Decisão nova → seção em `docs/BITACORA.md`; estrutura nova → `docs/ARQUITETURA.md`.
 
