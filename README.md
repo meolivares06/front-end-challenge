@@ -53,6 +53,8 @@ Abra **http://localhost:4200**. O Angular repassa `/api` para a porta 3000.
 | Regras de arquitetura | `frontend/` | `npm run lint:boundaries` e `npm run lint` |
 | Ponta a ponta (navegador) | `frontend/` | `npx playwright install chromium` (uma vez), depois `npm run e2e` |
 
+O `npm run e2e` sobe a API e o Angular sozinho nas portas 3000 e 4200: **feche antes os servidores das opções 1 e 2** (Ctrl+C).
+
 O mesmo roda no CI a cada push ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ---
